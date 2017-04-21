@@ -25,7 +25,7 @@ docker pull milaq/kodi-headless:latest
 
 Run the container and set necessary environment variables:
 ```bash
-docker run -d --restart="always" --net=host --name kodi-server -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> kodi-headless
+docker run -d --restart=always --name kodi-server -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless
 ```
 
 If you want to map the webinterface ports natively then also append:
