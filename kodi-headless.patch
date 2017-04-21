@@ -1,0 +1,128 @@
+commit d09e0b42529c5739c9fd0ce732f9cdbf6fbf72cb
+Author: Celedhrim <celed+gitlab@ielf.org>
+Date:   Mon Jan 9 15:11:56 2017 +0100
+
+    Headless patch
+
+diff --git a/xbmc/AppParamParser.cpp b/xbmc/AppParamParser.cpp
+index 6f3c08e..5b71bf0 100644
+--- a/xbmc/AppParamParser.cpp
++++ b/xbmc/AppParamParser.cpp
+@@ -137,6 +137,8 @@ void CAppParamParser::ParseArg(const std::string &arg)
+     m_testmode = true;
+   else if (arg.substr(0, 11) == "--settings=")
+     g_advancedSettings.AddSettingsFile(arg.substr(11));
++  else if (arg == "--headless")
++    g_application.SetHeadless(true);
+   else if (arg.length() != 0 && arg[0] != '-')
+   {
+     if (m_testmode)
+diff --git a/xbmc/Application.cpp b/xbmc/Application.cpp
+index 620366e..06e369e 100644
+--- a/xbmc/Application.cpp
++++ b/xbmc/Application.cpp
+@@ -278,6 +278,7 @@ CApplication::CApplication(void)
+   , m_lastRenderTime(0)
+   , m_skipGuiRender(false)
+   , m_bStandalone(false)
++  , m_headless(false)
+   , m_bEnableLegacyRes(false)
+   , m_bTestMode(false)
+   , m_bSystemScreenSaverEnable(false)
+@@ -4308,15 +4309,18 @@ bool CApplication::OnMessage(CGUIMessage& message)
+ 
+       if (!m_pPlayer->IsPlayingVideo())
+       {
+-        if(g_windowManager.GetActiveWindow() == WINDOW_FULLSCREEN_VIDEO)
++        if (!IsHeadless())
+         {
+-          g_windowManager.PreviousWindow();
+-        }
+-        else
+-        {
+-          CSingleLock lock(g_graphicsContext);
+-          //  resets to res_desktop or look&feel resolution (including refreshrate)
+-          g_graphicsContext.SetFullScreenVideo(false);
++          if(g_windowManager.GetActiveWindow() == WINDOW_FULLSCREEN_VIDEO)
++            {
++              g_windowManager.PreviousWindow();
++            }
++            else
++            {
++              CSingleLock lock(g_graphicsContext);
++              //  resets to res_desktop or look&feel resolution (including refreshrate)
++              g_graphicsContext.SetFullScreenVideo(false);
++            }
+         }
+       }
+ 
+diff --git a/xbmc/Application.h b/xbmc/Application.h
+index 580fdce..803b115 100644
+--- a/xbmc/Application.h
++++ b/xbmc/Application.h
+@@ -342,6 +342,16 @@ public:
+     return m_bStandalone;
+   }
+ 
++  void SetHeadless(bool value)
++  {
++    m_headless = value;
++  }
++
++  bool IsHeadless() const
++  {
++    return m_headless;
++  }
++
+   void SetEnableLegacyRes(bool value)
+   {
+     m_bEnableLegacyRes = value;
+@@ -479,6 +489,7 @@ protected:
+   bool m_skipGuiRender;
+ 
+   bool m_bStandalone;
++  bool m_headless;
+   bool m_bEnableLegacyRes;
+   bool m_bTestMode;
+   bool m_bSystemScreenSaverEnable;
+diff --git a/xbmc/guilib/GUIDialog.cpp b/xbmc/guilib/GUIDialog.cpp
+index 24ffe85..0b99db3 100644
+--- a/xbmc/guilib/GUIDialog.cpp
++++ b/xbmc/guilib/GUIDialog.cpp
+@@ -169,7 +169,8 @@ void CGUIDialog::Open_Internal(bool bProcessRenderLoop, const std::string &param
+   CSingleLock lock(g_graphicsContext);
+ 
+   if (!g_windowManager.Initialized() ||
+-      (m_active && !m_closing && !IsAnimating(ANIM_TYPE_WINDOW_CLOSE)))
++      (m_active && !m_closing && !IsAnimating(ANIM_TYPE_WINDOW_CLOSE)) ||
++      g_application.IsHeadless())
+     return;
+ 
+   // set running before it's added to the window manager, else the auto-show code
+diff --git a/xbmc/platform/xbmc.cpp b/xbmc/platform/xbmc.cpp
+index 34e5ea6..ab38e90 100644
+--- a/xbmc/platform/xbmc.cpp
++++ b/xbmc/platform/xbmc.cpp
+@@ -61,7 +61,7 @@ extern "C" int XBMC_Run(bool renderGUI, CFileItemList &playlist)
+   g_RBP.LogFirmwareVerison();
+ #endif
+ 
+-  if (renderGUI && !g_application.CreateGUI())
++  if (renderGUI && !g_application.IsHeadless() && !g_application.CreateGUI())
+   {
+     CMessagePrinter::DisplayError("ERROR: Unable to create GUI. Exiting");
+     return status;
+diff --git a/xbmc/settings/SettingConditions.cpp b/xbmc/settings/SettingConditions.cpp
+index 6b1f2b6..e111490 100644
+--- a/xbmc/settings/SettingConditions.cpp
++++ b/xbmc/settings/SettingConditions.cpp
+@@ -338,6 +338,9 @@ void CSettingConditions::Initialize()
+     m_simpleConditions.insert("isstandalone");
+ #endif
+ 
++  if (g_application.IsHeadless())
++    m_simpleConditions.insert("is_headless");
++
+   if(CAEFactory::SupportsQualitySetting())
+     m_simpleConditions.insert("has_ae_quality_levels");
+ 
