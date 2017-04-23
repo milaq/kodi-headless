@@ -78,22 +78,18 @@ ARG RUNTIME_DEPENDENCIES="\
   libyajl2 \
   "
 
-RUN \
-  apt-get update && \
-  apt-get install --no-install-recommends -y \
-    $BUILD_DEPENDENCIES
-
 COPY kodi-headless.patch /tmp/kodi-headless.patch
 
 RUN \
-  mkdir -p /tmp/kodi_src && \  
+  apt-get update && \
+  apt-get install --no-install-recommends -y $BUILD_DEPENDENCIES && \
+
+  mkdir -p /tmp/kodi_src && \
   curl -o /tmp/kodi.tar.gz -L "https://github.com/xbmc/xbmc/archive/${KODI_VER}-${KODI_NAME}.tar.gz" && \
   tar xf /tmp/kodi.tar.gz -C /tmp/kodi_src --strip-components=1 && \
   cd /tmp/kodi_src && \
   git apply /tmp/kodi-headless.patch && \
-
   make -C tools/depends/target/crossguid PREFIX=/usr && \
-
   ./bootstrap && \
   ./configure \
     --build=$CBUILD \
@@ -125,23 +121,20 @@ RUN \
     --host=$CHOST \
     --prefix=$KODI_WORKDIR \
     && \
-
   make -j$(nproc --all) && \
   make install && \
-  cp -r tools/EventClients/ $KODI_WORKDIR/
+  cp -r tools/EventClients/ $KODI_WORKDIR/ && \
 
-RUN \
   apt-get purge --auto-remove -y $BUILD_DEPENDENCIES && \
   apt-get install --no-install-recommends -y $RUNTIME_DEPENDENCIES && \
   apt-get clean && \
-  rm -rf /tmp/kodi*
+  rm -rf /tmp/kodi* && \
 
-RUN useradd -d $KODI_WORKDIR kodi
+  useradd -d $KODI_WORKDIR kodi && \
+  chown kodi. -R $KODI_WORKDIR
 
 COPY advancedsettings.xml.default $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml.default
 COPY kodi_init.sh /sbin/kodi_init.sh
-
-RUN chown kodi. -R $KODI_WORKDIR
 
 VOLUME $KODI_WORKDIR/.kodi
 EXPOSE 8080 9090 9777/udp
