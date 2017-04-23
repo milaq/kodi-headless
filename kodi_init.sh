@@ -1,12 +1,15 @@
 #!/bin/bash
 set -e
 
+echo -e "\nStarting container...\n======================================================="
+
 if [ ! -e $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml ]; then
   cp $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml.default $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml
   chown kodi. $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml
 fi
 
 if [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
+  echo "Shared MySQL database: YES"
   cp $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml.default $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml
   sed -i -e "s/\(<host>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBHOST\3/g" $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml
   sed -i -e "s/\(<user>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBUSER\3/g" $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml
@@ -14,6 +17,8 @@ if [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
   sed -i -e "s/\(<type>\)\([^<]*\)\(<[^>]*\)/\1mysql\3/g" $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml
   sed -i -e "s/\(<port>\)\([^<]*\)\(<[^>]*\)/\13306\3/g" $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml
   chown kodi. $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml
+else
+  echo "Shared MySQL database: NO"
 fi
 
 if [ -z $KODI_UPDATE_INTERVAL ]; then
@@ -39,7 +44,20 @@ function clean_library_job {
   done
 }
 
-echo -e "\nStarting Kodi...\n==============================" && sleep 5 && tail -f -n100 $KODI_WORKDIR/.kodi/temp/kodi.log &
 update_library_job &
-clean_library_job &
+echo "Automatic library update: YES (${KODI_UPDATE_INTERVAL}s)"
+
+if [[ $KODI_CLEAN == "yes" ]] || [[ $KODI_CLEAN == "true" ]]; then
+  if [ -e $KODI_WORKDIR/.kodi/userdata/sources.xml ]; then
+    echo "Automatic library cleaning: YES (${KODI_CLEAN_INTERVAL}s)"
+    clean_library_job &
+  else
+    echo "Automatic library cleaning: NO (sources.xml not found)"
+  fi
+else
+  echo "Automatic library cleaning: NO"
+fi
+
+echo "======================================================="
+sleep 5 && tail -f -n100 $KODI_WORKDIR/.kodi/temp/kodi.log &
 su kodi -c "$KODI_WORKDIR/bin/kodi --headless"

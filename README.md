@@ -44,7 +44,20 @@ Container environment variables:
 * `KODI_DBUSER` - MySQL user for Kodi (required)
 * `KODI_DBPASS` - MySQL password for Kodi user (required)
 * `KODI_UPDATE_INTERVAL` - How often to scan for library changes on remote sources in seconds (optional, default is 300 [5 minutes])
+* `KODI_CLEAN` - Whether to clean up the library periodically (requires sources.xml to be present)
 * `KODI_CLEAN_INTERVAL` - How often to clean up the library in seconds (optional, default is 86400 [1 day])
+
+
+If you want to enable automatic library cleaning you HAVE to create an appropriate sources.xml (or grab a copy from you main HTPC)
+```bash
+/opt/kodi-headless/.kodi/userdata/sources.xml 
+```
+inside the container volume and enable it via the respective flag:
+```bash
+-e KODI_CLEAN=yes
+```
+
+BIG FAT WARNING: A misconfigured sources.xml can lead to the Kodi instance not finding any of your media which will result in emtpying your database. Make a backup of your database and/or be double sure of the sources.xml before enabling this feature!
 
 # Credits
 
