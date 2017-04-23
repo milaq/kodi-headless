@@ -79,6 +79,8 @@ ARG RUNTIME_DEPENDENCIES="\
   "
 
 COPY kodi-headless.patch /tmp/kodi-headless.patch
+COPY advancedsettings.xml.default $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml.default
+COPY kodi_init.sh /sbin/kodi_init.sh
 
 RUN \
   apt-get update && \
@@ -132,9 +134,6 @@ RUN \
 
   useradd -d $KODI_WORKDIR kodi && \
   chown kodi. -R $KODI_WORKDIR
-
-COPY advancedsettings.xml.default $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml.default
-COPY kodi_init.sh /sbin/kodi_init.sh
 
 VOLUME $KODI_WORKDIR/.kodi
 EXPOSE 8080 9090 9777/udp
