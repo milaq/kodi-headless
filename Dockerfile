@@ -138,4 +138,5 @@ COPY kodi_init.sh /sbin/kodi_init.sh
 
 VOLUME $KODI_WORKDIR/.kodi
 EXPOSE 8080 9090 9777/udp
+WORKDIR $KODI_WORKDIR
 ENTRYPOINT ["/sbin/kodi_init.sh"]
