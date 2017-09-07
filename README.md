@@ -3,7 +3,7 @@
 # Introduction
 A headless, dockerized Kodi instance for a shared MySQL setup to allow having a webinterface and automatic periodic library updates without the need for a player system to be permanently on.
 
-Kodi version: `17.3 Krypton`
+Kodi version: `17 (Krypton)`
 Base image: `Debian Jessie`
 
 # Prerequisites
