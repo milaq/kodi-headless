@@ -2,7 +2,7 @@ FROM debian:jessie
 MAINTAINER milaq
 
 ARG KODI_NAME="Krypton"
-ARG KODI_VER="17.4"
+ARG KODI_VER="17.5"
 ENV KODI_WORKDIR=/opt/kodi-headless
 
 ARG BUILD_DATE
