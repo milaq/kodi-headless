@@ -80,6 +80,7 @@ ARG RUNTIME_DEPENDENCIES="\
 
 COPY kodi-headless.patch /tmp/kodi-headless.patch
 COPY advancedsettings.xml.default $KODI_WORKDIR/.kodi/userdata/advancedsettings.xml.default
+COPY smb.conf $KODI_WORKDIR/.kodi/.smb/user.conf
 COPY kodi_init.sh /sbin/kodi_init.sh
 
 RUN \
