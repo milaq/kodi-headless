@@ -53,12 +53,16 @@ If you want to enable automatic library cleaning you HAVE to create an appropria
 ```bash
 /opt/kodi-headless/.kodi/userdata/sources.xml 
 ```
-inside the container volume and enable it via the respective flag:
+inside the container volume directly or reference a copy on the docker host, e.g.:
+```bash
+-v /path/to/sources.xml:/opt/kodi-headless/.kodi/userdata/sources.xml
+```
+and enable library cleaning via the respective flag:
 ```bash
 -e KODI_CLEAN=yes
 ```
 
-BIG FAT WARNING: A misconfigured sources.xml can lead to the Kodi instance not finding any of your media which will result in emtpying your database. Make a backup of your database and/or be double sure of the sources.xml before enabling this feature!
+__WARNING__: A misconfigured sources.xml can lead to the Kodi instance not finding any of your media which will result in emtpying your database. Make a backup of your database and/or be double sure of the sources.xml before enabling this feature!
 
 # Credits
 
