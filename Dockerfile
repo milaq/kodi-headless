@@ -85,7 +85,6 @@ COPY kodi_init.sh /sbin/kodi_init.sh
 RUN \
   apt-get update && \
   apt-get install --no-install-recommends -y $BUILD_DEPENDENCIES && \
-
   mkdir -p /tmp/kodi_src && \
   curl -o /tmp/kodi.tar.gz -L "https://github.com/xbmc/xbmc/archive/${KODI_VER}-${KODI_NAME}.tar.gz" && \
   tar xf /tmp/kodi.tar.gz -C /tmp/kodi_src --strip-components=1 && \
@@ -126,12 +125,10 @@ RUN \
   make -j$(nproc --all) && \
   make install && \
   cp -r tools/EventClients/ $KODI_WORKDIR/ && \
-
   apt-get purge --auto-remove -y $BUILD_DEPENDENCIES && \
   apt-get install --no-install-recommends -y $RUNTIME_DEPENDENCIES && \
   apt-get clean && \
   rm -rf /tmp/kodi* && \
-
   useradd -d $KODI_WORKDIR kodi && \
   chown kodi. -R $KODI_WORKDIR
 
