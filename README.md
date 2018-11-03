@@ -51,11 +51,11 @@ Container environment variables:
 
 If you want to enable automatic library cleaning you HAVE to create an appropriate sources.xml (or grab a copy from you main HTPC)
 ```bash
-/opt/kodi-headless/.kodi/userdata/sources.xml 
+/config/.kodi/userdata/sources.xml
 ```
 inside the container volume directly or reference a copy on the docker host, e.g.:
 ```bash
--v /path/to/sources.xml:/opt/kodi-headless/.kodi/userdata/sources.xml
+-v /path/to/sources.xml:/config/.kodi/userdata/sources.xml
 ```
 and enable library cleaning via the respective flag:
 ```bash
