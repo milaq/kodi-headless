@@ -4,6 +4,7 @@ ARG KODI_NAME="Krypton"
 ARG KODI_VER="17.6"
 ARG DEBIAN_FRONTEND="noninteractive"
 
+COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
 RUN apt-get update && apt-get install --no-install-recommends -y \
   ant \
   git-core \
@@ -104,6 +105,7 @@ ARG DEBIAN_FRONTEND="noninteractive"
 
 COPY --from=buildstage /tmp/kodi_build/usr/ /usr/
 
+COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
 RUN apt-get update && apt-get install --no-install-recommends -y \
   libcurl3 \
   libegl1-mesa \
