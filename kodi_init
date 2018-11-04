@@ -5,6 +5,7 @@ echo -e "\nStarting container...\n==============================================
 
 cp /config/.kodi/userdata/advancedsettings.xml.default /config/.kodi/userdata/advancedsettings.xml
 chown kodi. /config/.kodi/userdata/advancedsettings.xml
+mkdir /var/cache/samba 2> /dev/null
 
 if [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
   echo "Shared MySQL database: YES"
