@@ -4,17 +4,18 @@
 A headless, dockerized Kodi instance for a shared MySQL setup to allow having a webinterface and automatic periodic library updates without the need for a player system to be permanently on.
 
 Kodi version: `17 (Krypton)`
-Base image: `Debian Jessie`
+Base image: `Debian Stretch`
 
 # Prerequisites
 You need to have set up library sharing via a dedicated MySQL database beforehand by reading, understanding and executing the necessary steps in the [MySQL library sharing guide](http://kodi.wiki/view/MySQL).
 
-WARNING - as already stated in the wiki but here once again: Every Kodi "client" must run the same version of Kodi!
+WARNING - as already stated in the wiki but here once again: Every client must run the same version of Kodi!
 
-Best way to set up library sharing in the container is by fully configuring your shared library, its sources and scrapers via another full GUI host (preferrably your main HTPC) and setting up the Kodi headless instance afterwards.
-The server needs fully configured database access and your sources (preferrably SMB or NFS) must be reachable from the headless instance. All updating, scraping and cleaning can then be handled by the headless Kodi instance on its own without further ado.
+Best way to set up library sharing in the container is by fully configuring your shared library, its sources and scrapers via another GUI host (e.g. your HTPC) and setting up the Kodi headless instance afterwards.
+The server needs fully configured database access and your sources (SMB or NFS) must be reachable from the headless instance.
+All updating, scraping and cleaning can then be handled automatically by the headless Kodi instance on its own.
 
-REMINDER: If you are not using TMDB/TVDB scrapers you need to take care of installing the respective plugins in the container yourself.
+REMINDER: If you are not using TMDB/TVDB scrapers you need to take care of installing and enabling the respective plugins in the container yourself.
 
 # Usage
 
@@ -25,7 +26,7 @@ docker pull milaq/kodi-headless:latest
 
 Run the container and set necessary environment variables:
 ```bash
-docker run -d --restart=always --name kodi-server -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless
+docker run -d --restart=always --name kodi-headless -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless
 ```
 
 If you want to map the webinterface ports natively then also append:
@@ -65,5 +66,5 @@ __WARNING__: A misconfigured sources.xml can lead to the Kodi instance not findi
 
 # Credits
 
-Thanks goes out to linuxserver.io for creating a solid base of a dockerized Kodi version to work with.  
+Thanks goes out to linuxserver.io for creating a solid base of a dockerized Kodi version to work with.
 More thanks goes to Celedhrim for creating a clean headless patch.
