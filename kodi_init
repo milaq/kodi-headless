@@ -53,15 +53,8 @@ if [[ $KODI_CLEAN == "yes" ]] || [[ $KODI_CLEAN == "true" ]]; then
 else
   echo "Automatic library cleaning: NO"
 fi
-if [[ $DEBUG == "yes" ]] || [[ $DEBUG == "true" ]]; then
-  echo "Debug: YES"
-fi
 
 echo "======================================================="
 
-if [[ $DEBUG == "yes" ]] || [[ $DEBUG == "true" ]]; then
-  tail -F -q /config/.kodi/temp/kodi.log 2> /dev/null &
-else
-  tail -F -q /config/.kodi/temp/kodi.log 2> /dev/null | grep -v "NOTICE:" &
-fi
+tail -F -q /config/.kodi/temp/kodi.log 2> /dev/null &
 su kodi -c "kodi --headless"

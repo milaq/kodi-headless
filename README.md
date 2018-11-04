@@ -46,7 +46,6 @@ Container environment variables:
 * `KODI_UPDATE_INTERVAL` - How often to scan for library changes on remote sources in seconds (optional, default is 300 [5 minutes])
 * `KODI_CLEAN` - Whether to clean up the library periodically [`true`/`false`] (optional, requires sources.xml to be present)
 * `KODI_CLEAN_INTERVAL` - How often to clean up the library in seconds (optional, default is 86400 [1 day])
-* `DEBUG` - Enable debug logging [`true`/`false`] (optional)
 
 
 If you want to enable automatic library cleaning you HAVE to create an appropriate sources.xml (or grab a copy from you main HTPC)
