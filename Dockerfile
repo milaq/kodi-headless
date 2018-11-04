@@ -64,6 +64,7 @@ RUN mkdir /tmp/kodi_src/build && cd /tmp/kodi_src/build && \
   -DCMAKE_INSTALL_LIBDIR=/usr/lib \
   -DCMAKE_INSTALL_PREFIX=/usr \
   -DENABLE_SMBCLIENT=ON \
+  -DENABLE_MYSQLCLIENT=ON \
   -DENABLE_NFS=ON \
   -DENABLE_UPNP=ON \
   -DENABLE_LCMS2=OFF \
