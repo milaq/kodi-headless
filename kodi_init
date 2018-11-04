@@ -28,6 +28,7 @@ fi
 function update_library_job {
   while true; do
     sleep $KODI_UPDATE_INTERVAL
+    sleep $((RANDOM % 5))
     su kodi -c "kodi-send --action='UpdateLibrary(video)'" > /dev/null
     su kodi -c "kodi-send --action='UpdateLibrary(music)'" > /dev/null
   done
