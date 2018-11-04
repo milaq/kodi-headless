@@ -17,12 +17,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   libtool \
   swig \
   doxygen \
-  openjdk-8-jre-headless \
-  default-jdk \
+  default-jdk-headless \
   libbz2-dev \
   liblzo2-dev \
   libtinyxml-dev \
-  libmariadbclient-dev \
+  libmariadbclient-dev-compat \
   libcurl4-openssl-dev \
   libssl-dev \
   libyajl-dev \
