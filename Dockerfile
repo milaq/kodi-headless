@@ -131,6 +131,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   && \
   apt-get clean
 
+RUN mkdir /var/cache/samba
+
 COPY advancedsettings.xml.default /config/.kodi/userdata/advancedsettings.xml.default
 COPY smb.conf /config/.kodi/.smb/user.conf
 COPY kodi_init /sbin/kodi_init
