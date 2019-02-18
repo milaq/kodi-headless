@@ -3,8 +3,8 @@
 # Introduction
 A headless, dockerized Kodi instance for a shared MySQL setup to allow having a webinterface and automatic periodic library updates without the need for a player system to be permanently on.
 
-Kodi version: `17 (Krypton)`
-Base image: `Debian Stretch`
+Kodi version: `18 (Leia)`
+Base image: `Ubuntu 18.04`
 
 # Prerequisites
 You need to have set up library sharing via a dedicated MySQL database beforehand by reading, understanding and executing the necessary steps in the [MySQL library sharing guide](http://kodi.wiki/view/MySQL).
@@ -21,12 +21,12 @@ REMINDER: If you are not using TMDB/TVDB scrapers you need to take care of insta
 
 Get the latest container image:
 ```bash
-docker pull milaq/kodi-headless:latest
+docker pull milaq/kodi-headless:leia
 ```
 
 Run the container and set necessary environment variables:
 ```bash
-docker run -d --restart=always --name kodi-headless -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless
+docker run -d --restart=always --name kodi-headless -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless:leia
 ```
 
 If you want to map the webinterface ports natively then also append:
@@ -51,11 +51,11 @@ Container environment variables:
 
 If you want to enable automatic library cleaning you HAVE to create an appropriate sources.xml (or grab a copy from you main HTPC)
 ```bash
-/config/.kodi/userdata/sources.xml
+/config/userdata/sources.xml
 ```
 inside the container volume directly or reference a copy on the docker host, e.g.:
 ```bash
--v /path/to/sources.xml:/config/.kodi/userdata/sources.xml
+-v /path/to/sources.xml:/config/userdata/sources.xml
 ```
 and enable library cleaning via the respective flag:
 ```bash
