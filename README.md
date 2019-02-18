@@ -21,12 +21,12 @@ REMINDER: If you are not using TMDB/TVDB scrapers you need to take care of insta
 
 Get the latest container image:
 ```bash
-docker pull milaq/kodi-headless:latest
+docker pull milaq/kodi-headless:krypton
 ```
 
 Run the container and set necessary environment variables:
 ```bash
-docker run -d --restart=always --name kodi-headless -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless
+docker run -d --restart=always --name kodi-headless -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless:krypton
 ```
 
 If you want to map the webinterface ports natively then also append:
