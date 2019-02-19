@@ -3,8 +3,17 @@
 # Introduction
 A headless, dockerized Kodi instance for a shared MySQL setup to allow having a webinterface and automatic periodic library updates without the need for a player system to be permanently on.
 
-Kodi version: `17 (Krypton)`
-Base image: `Debian Stretch`
+# Tags
+
+| Tagname              | Branch      | Kodi version | Base distro          |
+|----------------------|-------------|--------------|----------------------|
+| `latest`             | leia        | 18           | Ubuntu 18.04         |
+| `leia`               | leia        | 18           | Ubuntu 18.04         |
+| `krypton`            | krypton     | 17           | Debian 9             |
+
+**Attention**: The Information found below may differ between branches/tags. Make sure you inspect the readme for the respective tag.
+
+__You are currently viewing the readme for the branch: `krypton`__
 
 # Prerequisites
 You need to have set up library sharing via a dedicated MySQL database beforehand by reading, understanding and executing the necessary steps in the [MySQL library sharing guide](http://kodi.wiki/view/MySQL).
@@ -19,7 +28,7 @@ REMINDER: If you are not using TMDB/TVDB scrapers you need to take care of insta
 
 # Usage
 
-Get the latest container image:
+Get the container image:
 ```bash
 docker pull milaq/kodi-headless:krypton
 ```
