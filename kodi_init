@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-trap 'kill $(jobs -p)' EXIT
+trap 'kill $(jobs -p) 2>/dev/null' EXIT
 
 cp /usr/local/share/kodi/advancedsettings.xml.default /config/userdata/advancedsettings.xml
 chown kodi. /config/userdata/advancedsettings.xml
@@ -63,8 +63,5 @@ echo "Starting Kodi..."
 if [ -f /config/temp/kodi.log ]; then
   rm /config/temp/kodi.log
 fi
-if [ -f /tmp/.X100-lock ]; then
-  rm /tmp/.X100-lock
-fi
-tail -F -q /config/temp/kodi.log 2> /dev/null &
-exec su kodi -c "xpra start :100 --daemon=no --exit-with-children --start-child='kodi -p --standalone' > /dev/null 2>&1"
+tail -F -q /config/temp/kodi.log 2>/dev/null &
+exec su kodi -c "kodi -p --standalone --headless"

@@ -7,9 +7,9 @@ A headless, dockerized Kodi instance for a shared MySQL setup to allow having a 
 
 | Tagname              | Branch      | Kodi version | Base distro          |
 |----------------------|-------------|--------------|----------------------|
-| `latest`             | leia        | 18           | Ubuntu 18.04         |
-| `leia`               | leia        | 18           | Ubuntu 18.04         |
-| `krypton`            | krypton     | 17           | Debian 9             |
+| `latest`             | leia        | 18           | Debian Stretch       |
+| `leia`               | leia        | 18           | Debian Stretch       |
+| `krypton`            | krypton     | 17           | Debian Stretch       |
 
 **Attention**: The Information found below may differ between branches/tags. Make sure you inspect the readme for the respective tag.
 
