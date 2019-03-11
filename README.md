@@ -76,4 +76,4 @@ __WARNING__: A misconfigured sources.xml can lead to the Kodi instance not findi
 # Credits
 
 Thanks goes out to linuxserver.io for creating a solid base of a dockerized Kodi version to work with.
-More thanks goes to Celedhrim for creating a clean headless patch.
+More thanks goes to Celedhrim for creating the initial headless patch and sinopsysHK for the new headless patch since Leia.
