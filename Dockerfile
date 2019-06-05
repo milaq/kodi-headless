@@ -91,6 +91,7 @@ RUN mkdir /tmp/kodi_src/build && cd /tmp/kodi_src/build && \
   -DENABLE_VDPAU=OFF \
   -DENABLE_GLX=OFF \
   -DENABLE_SNDIO=OFF \
+  -DENABLE_LIRCCLIENT=OFF \
   && \
   make -j$(nproc --all) && \
   make DESTDIR=/tmp/kodi_build install
