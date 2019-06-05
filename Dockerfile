@@ -1,7 +1,7 @@
 FROM debian:stretch as buildstage
 
 ARG KODI_NAME="Leia"
-ARG KODI_VERSION="18.1"
+ARG KODI_VERSION="18.2"
 
 ARG DEBIAN_FRONTEND="noninteractive"
 COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
