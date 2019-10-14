@@ -1,7 +1,19 @@
-FROM debian:stretch as buildstage
+FROM alpine AS source
+
+RUN apk add --no-cache curl git ca-certificates tar
 
 ARG KODI_NAME="Leia"
 ARG KODI_VERSION="18.3"
+
+WORKDIR /usr/src
+RUN curl -o kodi.tar.gz -L "https://github.com/xbmc/xbmc/archive/${KODI_VERSION}-${KODI_NAME}.tar.gz"
+RUN install -d kodi && tar xf kodi.tar.gz --strip-components=1 -C kodi
+
+WORKDIR /usr/src/kodi
+COPY kodi-headless.patch .
+RUN git apply *.patch
+
+FROM debian:stretch AS buildstage
 
 ARG DEBIAN_FRONTEND="noninteractive"
 COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
@@ -53,16 +65,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   libfstrcmp-dev \
   zip
 
-COPY kodi-headless.patch /tmp/kodi-headless.patch
+COPY --from=source /usr/src/kodi /tmp/kodi_src
+WORKDIR /tmp/kodi_src/build
 
-RUN mkdir -p /tmp/kodi_src && \
-  curl -o /tmp/kodi.tar.gz -L "https://github.com/xbmc/xbmc/archive/${KODI_VERSION}-${KODI_NAME}.tar.gz" && \
-  tar xf /tmp/kodi.tar.gz -C /tmp/kodi_src --strip-components=1 && \
-  cd /tmp/kodi_src && \
-  git apply /tmp/kodi-headless.patch
-
-RUN mkdir /tmp/kodi_src/build && cd /tmp/kodi_src/build && \
-  cmake ../ \
+RUN cmake ../ \
   -DCMAKE_INSTALL_LIBDIR=/usr/lib \
   -DCMAKE_INSTALL_PREFIX=/usr \
   -DENABLE_INTERNAL_FLATBUFFERS=ON \
