@@ -1,3 +1,4 @@
+## Download, Unpack, Patch Kodi source
 FROM alpine AS source
 
 RUN apk add --no-cache curl git ca-certificates tar
@@ -13,6 +14,8 @@ WORKDIR /usr/src/kodi
 COPY kodi-headless.patch .
 RUN git apply *.patch
 
+## Prepare base for final image, and build image.
+## They share common files and installed packages.
 FROM debian:stretch AS base
 COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
 
