@@ -150,7 +150,7 @@ COPY kodi_init /sbin/kodi_init
 
 RUN useradd -m -u 10000 kodi && \
     chown kodi. -R /config && \
-    ln -s /config /usr/share/kodi/portable_data
+    ln -s /config /usr/local/share/kodi/portable_data
 
 VOLUME /config
 WORKDIR /config
