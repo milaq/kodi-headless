@@ -13,10 +13,39 @@ WORKDIR /usr/src/kodi
 COPY kodi-headless.patch .
 RUN git apply *.patch
 
-FROM debian:stretch AS buildstage
-
-ARG DEBIAN_FRONTEND="noninteractive"
+FROM debian:stretch AS base
 COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
+
+RUN apt-get update && apt-get install --no-install-recommends -y \
+  libcurl3 \
+  libegl1-mesa \
+  libglu1-mesa \
+  libfreetype6 \
+  libfribidi0 \
+  libglew2.0 \
+  liblzo2-2 \
+  libmicrohttpd12 \
+  libmariadbclient18 \
+  libnfs8 \
+  libpcrecpp0v5 \
+  libpython2.7 \
+  libsmbclient \
+  libtag1v5 \
+  libtinyxml2.6.2v5 \
+  libxml2 \
+  libcdio13 \
+  libxcb-shape0 \
+  libxrandr2 \
+  libxslt1.1 \
+  libyajl2 \
+  libass5 \
+  libiso9660-8 \
+  libfstrcmp0 \
+  ca-certificates \
+  && \
+  apt-get clean
+
+FROM base AS buildstage
 
 RUN apt-get update && apt-get install --no-install-recommends -y \
   ant \
@@ -105,45 +134,10 @@ RUN cmake ../ \
 RUN cp /tmp/kodi_src/tools/EventClients/Clients/KodiSend/kodi-send.py /tmp/kodi_build/usr/bin/kodi-send && \
   mkdir -p /tmp/kodi_build/usr/lib/python2.7/ && cp /tmp/kodi_src/tools/EventClients/lib/python/xbmcclient.py /tmp/kodi_build/usr/lib/python2.7/xbmcclient.py
 
-
-FROM debian:stretch
+FROM base
 
 MAINTAINER milaq
 LABEL build_version="Build-date:- ${BUILD_DATE}"
-
-COPY --from=buildstage /tmp/kodi_build/usr/ /usr/
-
-ARG DEBIAN_FRONTEND="noninteractive"
-COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
-
-RUN apt-get update && apt-get install --no-install-recommends -y \
-  libcurl3 \
-  libegl1-mesa \
-  libglu1-mesa \
-  libfreetype6 \
-  libfribidi0 \
-  libglew2.0 \
-  liblzo2-2 \
-  libmicrohttpd12 \
-  libmariadbclient18 \
-  libnfs8 \
-  libpcrecpp0v5 \
-  libpython2.7 \
-  libsmbclient \
-  libtag1v5 \
-  libtinyxml2.6.2v5 \
-  libxml2 \
-  libcdio13 \
-  libxcb-shape0 \
-  libxrandr2 \
-  libxslt1.1 \
-  libyajl2 \
-  libass5 \
-  libiso9660-8 \
-  libfstrcmp0 \
-  ca-certificates \
-  && \
-  apt-get clean
 
 RUN mkdir /var/cache/samba
 RUN mkdir -p /config/userdata
@@ -159,3 +153,5 @@ VOLUME /config
 WORKDIR /config
 EXPOSE 8080 9090 9777/udp
 CMD ["/sbin/kodi_init"]
+
+COPY --from=buildstage /tmp/kodi_build/usr/ /usr/
