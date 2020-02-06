@@ -3,13 +3,22 @@
 set -e
 trap 'kill $(jobs -p) 2>/dev/null' EXIT
 
-cp /usr/local/share/kodi/advancedsettings.xml.default /config/userdata/advancedsettings.xml
-chown kodi. /config/userdata/advancedsettings.xml
+default_advancedsettings=true
+cp /usr/local/share/kodi/advancedsettings.xml.default /config/userdata/advancedsettings.xml || {
+  default_advancedsettings=false
+  echo "Change ownership of /config/userdata/advancedsettings.xml: NO (file is mounted read-only)"
+}
+if [ "$default_advancedsettings" = true ]; then
+  echo "Change ownership of /config/userdata/advancedsettings.xml: YES"
+  chown kodi. /config/userdata/advancedsettings.xml
+fi
 
 echo "======================================================="
 
-if [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
-  echo "Shared MySQL database: YES"
+if [ "$default_advancedsettings" = false ]; then
+  echo "Overwrite MySQL settings: NO (/config/userdata/advancedsettings.xml is mounted read-only)"
+elif [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
+  echo "Overwrite MySQL settings: YES"
   sed -i -e "s/\(<host>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBHOST\3/g" /config/userdata/advancedsettings.xml
   sed -i -e "s/\(<user>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBUSER\3/g" /config/userdata/advancedsettings.xml
   sed -i -e "s/\(<pass>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBPASS\3/g" /config/userdata/advancedsettings.xml

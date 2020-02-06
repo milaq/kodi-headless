@@ -57,6 +57,7 @@ Container environment variables:
 * `KODI_CLEAN` - Whether to clean up the library periodically [`true`/`false`] (optional, requires sources.xml to be present)
 * `KODI_CLEAN_INTERVAL` - How often to clean up the library in seconds (optional, default is 86400 [1 day])
 
+## Automatic library cleaning
 
 If you want to enable automatic library cleaning you HAVE to create an appropriate sources.xml (or grab a copy from you main HTPC)
 ```bash
@@ -72,6 +73,23 @@ and enable library cleaning via the respective flag:
 ```
 
 __WARNING__: A misconfigured sources.xml can lead to the Kodi instance not finding any of your media which will result in emtpying your database. Make a backup of your database and/or be double sure of the sources.xml before enabling this feature!
+
+## Custom advancedsettings.xml
+
+If you want to supply a custom advancedsettings.xml, make sure the file is readable by uid 10000 and mount it read-only, e.g.:
+```bash
+-v /path/to/advancedsettings.xml:/config/userdata/advancedsettings.xml:ro
+```
+See advancedsettings.xml.default for the container's defaults. Make sure to add appropriate values for
+```xml
+<videodatabase>
+    ...
+</videodatabase>
+<musicdatabase>
+    ...
+</musicdatabase>
+```
+as `KODI_DBHOST`, `KODI_DBUSER` and `KODI_DBPASS` can't be applied when the file is read-only.
 
 # Credits
 
