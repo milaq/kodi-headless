@@ -3,20 +3,23 @@
 set -e
 trap 'kill $(jobs -p) 2>/dev/null' EXIT
 
-cp /usr/local/share/kodi/advancedsettings.xml.default /config/userdata/advancedsettings.xml
-chown kodi. /config/userdata/advancedsettings.xml
-
 echo "======================================================="
+if [ ! -e /config/userdata/advancedsettings.xml ]; then
+  cp /usr/local/share/kodi/advancedsettings.xml.default /config/userdata/advancedsettings.xml
+  chown kodi. /config/userdata/advancedsettings.xml
 
-if [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
-  echo "Shared MySQL database: YES"
-  sed -i -e "s/\(<host>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBHOST\3/g" /config/userdata/advancedsettings.xml
-  sed -i -e "s/\(<user>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBUSER\3/g" /config/userdata/advancedsettings.xml
-  sed -i -e "s/\(<pass>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBPASS\3/g" /config/userdata/advancedsettings.xml
-  sed -i -e "s/\(<type>\)\([^<]*\)\(<[^>]*\)/\1mysql\3/g" /config/userdata/advancedsettings.xml
-  sed -i -e "s/\(<port>\)\([^<]*\)\(<[^>]*\)/\13306\3/g" /config/userdata/advancedsettings.xml
+  if [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
+    echo "Shared MySQL database: YES"
+    sed -i -e "s/\(<host>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBHOST\3/g" /config/userdata/advancedsettings.xml
+    sed -i -e "s/\(<user>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBUSER\3/g" /config/userdata/advancedsettings.xml
+    sed -i -e "s/\(<pass>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBPASS\3/g" /config/userdata/advancedsettings.xml
+    sed -i -e "s/\(<type>\)\([^<]*\)\(<[^>]*\)/\1mysql\3/g" /config/userdata/advancedsettings.xml
+    sed -i -e "s/\(<port>\)\([^<]*\)\(<[^>]*\)/\13306\3/g" /config/userdata/advancedsettings.xml
+  else
+    echo "Shared MySQL database: NO"
+  fi
 else
-  echo "Shared MySQL database: NO"
+  echo "Shared MySQL database: UNKNOWN (Using custom advancedsettings.xml)"
 fi
 
 if [ -z $KODI_UPDATE_INTERVAL ]; then

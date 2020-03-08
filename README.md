@@ -50,12 +50,16 @@ If eventserver access is also required outside of the container:
 
 Container environment variables:
 
-* `KODI_DBHOST` - MySQL database host address (required)
-* `KODI_DBUSER` - MySQL user for Kodi (required)
-* `KODI_DBPASS` - MySQL password for Kodi user (required)
+* `KODI_DBHOST` - MySQL database host address
+* `KODI_DBUSER` - MySQL user for Kodi
+* `KODI_DBPASS` - MySQL password for Kodi user
 * `KODI_UPDATE_INTERVAL` - How often to scan for library changes on remote sources in seconds (optional, default is 300 [5 minutes])
 * `KODI_CLEAN` - Whether to clean up the library periodically [`true`/`false`] (optional, requires sources.xml to be present)
 * `KODI_CLEAN_INTERVAL` - How often to clean up the library in seconds (optional, default is 86400 [1 day])
+
+_Experimental_: You may also mount your own copy of `advancedsettings.xml` if you like to. The container startup will then skip any of the database configuration variables (KODI_DB*) and just use the supplied copy.
+
+## Automatic library cleaning
 
 If you want to enable automatic library cleaning you HAVE to create an appropriate `sources.xml` and `passwords.xml` (or grab a copies from your HTPC)
 ```bash
