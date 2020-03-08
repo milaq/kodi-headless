@@ -24,7 +24,7 @@ Best way to set up library sharing in the container is by fully configuring your
 The server needs fully configured database access and your sources (SMB or NFS) must be reachable from the headless instance.
 All updating, scraping and cleaning can then be handled automatically by the headless Kodi instance on its own.
 
-REMINDER: If you are not using TMDB/TVDB scrapers you need to take care of installing and enabling the respective plugins in the container yourself.
+REMINDER: If you are not using the default scrapers you need to take care of installing and enabling the respective plugins in the container yourself.
 
 # Usage
 
