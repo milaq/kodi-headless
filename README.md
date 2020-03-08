@@ -57,21 +57,28 @@ Container environment variables:
 * `KODI_CLEAN` - Whether to clean up the library periodically [`true`/`false`] (optional, requires sources.xml to be present)
 * `KODI_CLEAN_INTERVAL` - How often to clean up the library in seconds (optional, default is 86400 [1 day])
 
-
-If you want to enable automatic library cleaning you HAVE to create an appropriate sources.xml (or grab a copy from you main HTPC)
+If you want to enable automatic library cleaning you HAVE to create an appropriate `sources.xml` and `passwords.xml` (or grab a copies from your HTPC)
 ```bash
 /config/userdata/sources.xml
+/config/userdata/passwords.xml
 ```
 inside the container volume directly or reference a copy on the docker host, e.g.:
 ```bash
 -v /path/to/sources.xml:/config/userdata/sources.xml
+-v /path/to/passwords.xml:/config/userdata/passwords.xml
 ```
 and enable library cleaning via the respective flag:
 ```bash
 -e KODI_CLEAN=yes
 ```
 
-__WARNING__: A misconfigured sources.xml can lead to the Kodi instance not finding any of your media which will result in emtpying your database. Make a backup of your database and/or be double sure of the sources.xml before enabling this feature!
+__WARNING__: A misconfigured sources.xml or passwords.xml can lead to the Kodi instance not finding any of your media which will result in emtpying your database. Make a backup of your database and/or be double sure before enabling this feature!
+
+__NOTE__: If you don't utilize network shares which require authentication you may also supply a skeleton `passwords.xml`:
+```bash
+<passwords>
+</passwords>
+```
 
 # Credits
 

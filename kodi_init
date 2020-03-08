@@ -47,11 +47,11 @@ update_library_job &
 echo "Automatic library update: YES (${KODI_UPDATE_INTERVAL}s)"
 
 if [[ $KODI_CLEAN == "yes" ]] || [[ $KODI_CLEAN == "true" ]]; then
-  if [ -e /config/userdata/sources.xml ]; then
+  if [ -e /config/userdata/sources.xml ] && [ -e /config/userdata/passwords.xml ]; then
     echo "Automatic library cleaning: YES (${KODI_CLEAN_INTERVAL}s)"
     clean_library_job &
   else
-    echo "Automatic library cleaning: NO (/config/userdata/sources.xml not found)"
+    echo "Automatic library cleaning: NO (sources.xml/passwords.xml not found)"
   fi
 else
   echo "Automatic library cleaning: NO"
