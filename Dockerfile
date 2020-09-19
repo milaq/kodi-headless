@@ -136,6 +136,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   libiso9660-8 \
   libfstrcmp0 \
   ca-certificates \
+  xmlstarlet \
   && \
   apt-get clean
 

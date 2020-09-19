@@ -10,11 +10,18 @@ if [ ! -e /config/userdata/advancedsettings.xml ]; then
 
   if [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
     echo "Shared MySQL database: YES"
-    sed -i -e "s/\(<host>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBHOST\3/g" /config/userdata/advancedsettings.xml
-    sed -i -e "s/\(<user>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBUSER\3/g" /config/userdata/advancedsettings.xml
-    sed -i -e "s/\(<pass>\)\([^<]*\)\(<[^>]*\)/\1$KODI_DBPASS\3/g" /config/userdata/advancedsettings.xml
-    sed -i -e "s/\(<type>\)\([^<]*\)\(<[^>]*\)/\1mysql\3/g" /config/userdata/advancedsettings.xml
-    sed -i -e "s/\(<port>\)\([^<]*\)\(<[^>]*\)/\13306\3/g" /config/userdata/advancedsettings.xml
+    xmlstarlet ed -L -u "advancedsettings/videodatabase/host" -v "$KODI_DBHOST" /config/userdata/advancedsettings.xml
+    xmlstarlet ed -L -u "advancedsettings/videodatabase/user" -v "$KODI_DBUSER" /config/userdata/advancedsettings.xml
+    xmlstarlet ed -L -u "advancedsettings/videodatabase/pass" -v "$KODI_DBPASS" /config/userdata/advancedsettings.xml
+    if [ ! -z $KODI_DBPREFIX_VIDEOS ]; then
+      xmlstarlet ed -L -u "advancedsettings/videodatabase/name" -v "$KODI_DBPREFIX_VIDEOS" /config/userdata/advancedsettings.xml
+    fi
+    xmlstarlet ed -L -u "advancedsettings/musicdatabase/host" -v "$KODI_DBHOST" /config/userdata/advancedsettings.xml
+    xmlstarlet ed -L -u "advancedsettings/musicdatabase/user" -v "$KODI_DBUSER" /config/userdata/advancedsettings.xml
+    xmlstarlet ed -L -u "advancedsettings/musicdatabase/pass" -v "$KODI_DBPASS" /config/userdata/advancedsettings.xml
+    if [ ! -z $KODI_DBPREFIX_MUSIC ]; then
+      xmlstarlet ed -L -u "advancedsettings/musicdatabase/name" -v "$KODI_DBPREFIX_MUSIC" /config/userdata/advancedsettings.xml
+    fi
   else
     echo "Shared MySQL database: NO"
   fi

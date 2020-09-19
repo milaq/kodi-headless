@@ -53,6 +53,8 @@ Container environment variables:
 * `KODI_DBHOST` - MySQL database host address
 * `KODI_DBUSER` - MySQL user for Kodi
 * `KODI_DBPASS` - MySQL password for Kodi user
+* `KODI_DBPREFIX_VIDEOS` - MySQL database prefix for the video database
+* `KODI_DBPREFIX_MUSIC` - MySQL database prefix for the music database
 * `KODI_UPDATE_INTERVAL` - How often to scan for library changes on remote sources in seconds (optional, default is 300 [5 minutes])
 * `KODI_CLEAN` - Whether to clean up the library periodically [`true`/`false`] (optional, requires sources.xml to be present)
 * `KODI_CLEAN_INTERVAL` - How often to clean up the library in seconds (optional, default is 86400 [1 day])

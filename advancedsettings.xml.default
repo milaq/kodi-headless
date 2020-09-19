@@ -1,17 +1,19 @@
 <advancedsettings>
   <videodatabase>
-    <type></type>
     <host></host>
-    <port></port>
+    <type>mysql</type>
+    <port>3306</port>
     <user></user>
     <pass></pass>
+    <name></name>
   </videodatabase>
   <musicdatabase>
-    <type></type>
     <host></host>
-    <port></port>
+    <type>mysql</type>
+    <port>3306</port>
     <user></user>
     <pass></pass>
+    <name></name>
   </musicdatabase>
   <services>
     <airplay>false</airplay>
