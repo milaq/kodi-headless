@@ -1,16 +1,16 @@
 <advancedsettings>
   <videodatabase>
     <host></host>
-    <type>mysql</type>
-    <port>3306</port>
+    <type></type>
+    <port></port>
     <user></user>
     <pass></pass>
     <name></name>
   </videodatabase>
   <musicdatabase>
     <host></host>
-    <type>mysql</type>
-    <port>3306</port>
+    <type></type>
+    <port></port>
     <user></user>
     <pass></pass>
     <name></name>

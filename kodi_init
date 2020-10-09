@@ -5,17 +5,22 @@ trap 'kill $(jobs -p) 2>/dev/null' EXIT
 
 echo "======================================================="
 if [ ! -e /config/userdata/advancedsettings.xml ]; then
+  if [ ! -d /config/userdata ]; then
+    mkdir /config/userdata
+  fi
   cp /usr/local/share/kodi/advancedsettings.xml.default /config/userdata/advancedsettings.xml
   chown kodi. /config/userdata/advancedsettings.xml
 
   if [ ! -z $KODI_DBHOST ] && [ ! -z $KODI_DBUSER ] && [ ! -z $KODI_DBPASS ]; then
     echo "Shared MySQL database: YES"
+    xmlstarlet ed -L -u "advancedsettings/videodatabase/type" -v "mysql" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/videodatabase/host" -v "$KODI_DBHOST" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/videodatabase/user" -v "$KODI_DBUSER" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/videodatabase/pass" -v "$KODI_DBPASS" /config/userdata/advancedsettings.xml
     if [ ! -z $KODI_DBPREFIX_VIDEOS ]; then
       xmlstarlet ed -L -u "advancedsettings/videodatabase/name" -v "$KODI_DBPREFIX_VIDEOS" /config/userdata/advancedsettings.xml
     fi
+    xmlstarlet ed -L -u "advancedsettings/musicdatabase/type" -v "mysql" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/musicdatabase/host" -v "$KODI_DBHOST" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/musicdatabase/user" -v "$KODI_DBUSER" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/musicdatabase/pass" -v "$KODI_DBPASS" /config/userdata/advancedsettings.xml
@@ -24,9 +29,21 @@ if [ ! -e /config/userdata/advancedsettings.xml ]; then
     fi
   else
     echo "Shared MySQL database: NO"
+    xmlstarlet ed -L -u "advancedsettings/videodatabase/type" -v "sqlite3" /config/userdata/advancedsettings.xml
+    xmlstarlet ed -L -u "advancedsettings/videodatabase/host" -v "/config/userdata/Database" /config/userdata/advancedsettings.xml
+
+    xmlstarlet ed -L -u "advancedsettings/musicdatabase/type" -v "sqlite3" /config/userdata/advancedsettings.xml
+    xmlstarlet ed -L -u "advancedsettings/musicdatabase/host" -v "/config/userdata/Database" /config/userdata/advancedsettings.xml
   fi
 else
   echo "Shared MySQL database: UNKNOWN (Using custom advancedsettings.xml)"
+fi
+
+if [ ! -e /config/.smb/user.conf ]; then
+  if [ ! -d /config/.smb ]; then
+    mkdir /config/.smb
+  fi
+  cp /usr/local/share/kodi/smb.conf /config/.smb/user.conf
 fi
 
 if [ -z $KODI_UPDATE_INTERVAL ]; then
@@ -70,8 +87,15 @@ fi
 echo "======================================================="
 
 echo "Starting Kodi..."
+
+# make sure the temp directory exists otherwise kodi will crash
+if [ ! -d /config/temp ]; then
+    mkdir /config/temp
+fi
 if [ -f /config/temp/kodi.log ]; then
   rm /config/temp/kodi.log
 fi
+# ensure kodi has full access rights to config
+chown kodi. -R /config
 tail -F -q /config/temp/kodi.log 2>/dev/null &
 exec su kodi -c "kodi -p --standalone --headless"

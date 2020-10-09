@@ -154,15 +154,15 @@ RUN echo "deb http://deb.debian.org/debian buster-backports main non-free" > /et
   && \
   apt-get clean
 
-RUN mkdir /var/cache/samba
-RUN mkdir -p /config/userdata
-COPY advancedsettings.xml.default /usr/local/share/kodi/advancedsettings.xml.default
-COPY smb.conf /config/.smb/user.conf
-COPY kodi_init /sbin/kodi_init
-
-RUN useradd -m -u 10000 kodi && \
+RUN mkdir /var/cache/samba && \
+    mkdir /usr/lib/kodi/addons && \
+    mkdir -p /config/userdata && \
+    useradd -m -u 10000 kodi && \
     chown kodi. -R /config && \
     ln -s /config /usr/share/kodi/portable_data
+
+COPY advancedsettings.xml.default smb.conf /usr/local/share/kodi/
+COPY kodi_init /sbin/kodi_init
 
 VOLUME /config
 WORKDIR /config
