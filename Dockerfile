@@ -161,7 +161,7 @@ RUN mkdir /var/cache/samba && \
     chown kodi. -R /config && \
     ln -s /config /usr/share/kodi/portable_data
 
-COPY advancedsettings.xml.default smb.conf /usr/local/share/kodi/
+COPY advancedsettings.xml.default guisettings.xml.default smb.conf /usr/local/share/kodi/
 COPY kodi_init /sbin/kodi_init
 
 VOLUME /config

@@ -39,6 +39,47 @@ else
   echo "Shared MySQL database: UNKNOWN (Using custom advancedsettings.xml)"
 fi
 
+if [ -z $KODI_DISABLE_AUDIO ]; then
+  KODI_DISABLE_AUDIO="no"
+fi
+
+# make sure guisettings/xml exists
+if [ ! -e /config/userdata/guisettings.xml ]; then
+  if [ ! -d /config/userdata ]; then
+    mkdir /config/userdata
+  fi
+  cp /usr/local/share/kodi/guisettings.xml.default /config/userdata/guisettings.xml
+  chown kodi. /config/userdata/guisettings.xml
+fi
+
+echo "Set up kodi webserver"
+# ensure webserver is enabled
+if [ -z "$KODI_WEBSERVER_USERNAME" -o -z "$KODI_WEBSERVER_PASSWORD" ]; then
+    xmlstarlet ed -L -u "settings/setting[@id=\"services.webserverauthentication\"]" -v "false" -d "//settings/setting[@id=\"services.webserverauthentication\"]/@default" /config/userdata/guisettings.xml
+else
+    xmlstarlet ed -L -u "settings/setting[@id=\"services.webserverauthentication\"]" -v "false" -d "//settings/setting[@id=\"services.webserverauthentication\"]/@default" /config/userdata/guisettings.xml
+fi
+xmlstarlet ed -L -u "settings/setting[@id=\"services.webserverpassword\"]" -v "$KODI_WEBSERVER_PASSWORD" -d "//settings/setting[@id=\"services.webserverpassword\"]/@default" /config/userdata/guisettings.xml
+xmlstarlet ed -L -u "settings/setting[@id=\"services.webserverusername\"]" -v "$KODI_WEBSERVER_USERNAME" -d "//settings/setting[@id=\"services.webserverusername\"]/@default" /config/userdata/guisettings.xml
+xmlstarlet ed -L -u "settings/setting[@id=\"services.webserver\"]" -v "true" -d "//settings/setting[@id=\"services.webserver\"]/@default" /config/userdata/guisettings.xml
+xmlstarlet ed -L -u "settings/setting[@id=\"services.webserverport\"]" -v "8080" -d "//settings/setting[@id=\"services.webserverport\"]/@default" /config/userdata/guisettings.xml
+xmlstarlet ed -L -u "settings/setting[@id=\"services.webserverssl\"]" -v "false" -d "//settings/setting[@id=\"services.webserverssl\"]/@default" /config/userdata/guisettings.xml
+xmlstarlet ed -L -u "settings/setting[@id=\"services.webserverpassword\"]" -v "" -d "//settings/setting[@id=\"services.webserverpassword\"]/@default" /config/userdata/guisettings.xml
+xmlstarlet ed -L -u "settings/setting[@id=\"services.webserverusername\"]" -v "" -d "//settings/setting[@id=\"services.webserverusername\"]/@default" /config/userdata/guisettings.xml
+
+if [[ $KODI_DISABLE_AUDIO == "yes" ]] || [[ $KODI_DISABLE_AUDIO == "true" ]]; then
+    # disable audio output
+    echo "Disable audio output"
+    xmlstarlet ed -L -u "settings/setting[@id=\"audiooutput.guisoundmode\"]" -v "0" -d "//settings/setting[@id=\"audiooutput.guisoundmode\"]/@default" /config/userdata/guisettings.xml
+    xmlstarlet ed -L -u "settings/setting[@id=\"audiooutput.streamnoise\"]" -v "false" -d "//settings/setting[@id=\"audiooutput.streamnoise\"]/@default" /config/userdata/guisettings.xml
+    xmlstarlet ed -L -u "settings/setting[@id=\"audiooutput.streamsilence\"]" -v "0" -d "//settings/setting[@id=\"audiooutput.streamsilence\"]/@default" /config/userdata/guisettings.xml
+    xmlstarlet ed -L -u "settings/setting[@id=\"lookandfeel.soundskin\"]" -v "" -d "//settings/setting[@id=\"lookandfeel.soundskin\"]/@default" /config/userdata/guisettings.xml
+fi
+if [ ! -z "$TZ" ]; then
+    echo "Adopt timezone from environment"
+    xmlstarlet ed -L -u "settings/setting[@id=\"locale.timezone\"]" -v "$TZ" -d "//settings/setting[@id=\"locale.timezone\"]/@default" /config/userdata/guisettings.xml
+fi
+
 if [ ! -e /config/.smb/user.conf ]; then
   if [ ! -d /config/.smb ]; then
     mkdir /config/.smb
@@ -84,6 +125,7 @@ else
   echo "Automatic library cleaning: NO"
 fi
 
+
 echo "======================================================="
 
 echo "Starting Kodi..."
@@ -95,7 +137,16 @@ fi
 if [ -f /config/temp/kodi.log ]; then
   rm /config/temp/kodi.log
 fi
+
+if [ -z $KODI_DEBUG ]; then
+  KODI_DEBUG="no"
+fi
+kodi_debug_opt=''
+if [[ $KODI_DEBUG == "yes" ]] || [[ $KODI_DEBUG == "true" ]]; then
+    kodi_debug_opt='--debug'
+fi
+
 # ensure kodi has full access rights to config
 chown kodi. -R /config
 tail -F -q /config/temp/kodi.log 2>/dev/null &
-exec su kodi -c "kodi -p --standalone --headless"
+exec su kodi -c "kodi -p --standalone --headless $kodi_debug_opt"
