@@ -1,12 +1,16 @@
-FROM debian:stretch as buildstage
+FROM debian:buster as buildstage
 
-ARG KODI_NAME="Leia"
-ARG KODI_VERSION="18.8"
+#ARG KODI_NAME="Leia"
+#ARG KODI_VERSION="18.8"
+ARG KODI_NAME="Matrix"
+ARG KODI_VERSION="19.0a2"
 
 ARG DEBIAN_FRONTEND="noninteractive"
 COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN echo "deb http://deb.debian.org/debian buster-backports main non-free" > /etc/apt/sources.list.d/backports.list && \
+    echo "Package: *\nPin: release a=buster-backports\nPin-Priority: 500\n"  > /etc/apt/preferences.d/99debian-backports && \
+    apt-get update && apt-get install --no-install-recommends -y \
   ant \
   git-core \
   build-essential \
@@ -41,11 +45,15 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   libgif-dev \
   libjpeg-dev \
   libglu1-mesa-dev \
+  libfmt-dev \
+  libspdlog-dev \
+  libgtest-dev \
+  libunistring-dev \
   gawk \
   gperf \
   curl \
   m4 \
-  python-dev \
+  python3-dev \
   uuid-dev \
   yasm \
   unzip \
@@ -63,6 +71,7 @@ RUN mkdir -p /tmp/kodi_src && \
 
 RUN mkdir /tmp/kodi_src/build && cd /tmp/kodi_src/build && \
   cmake ../ \
+  -DX11_RENDER_SYSTEM=gl \
   -DCMAKE_INSTALL_LIBDIR=/usr/lib \
   -DCMAKE_INSTALL_PREFIX=/usr \
   -DENABLE_INTERNAL_FLATBUFFERS=ON \
@@ -100,7 +109,7 @@ RUN cp /tmp/kodi_src/tools/EventClients/Clients/KodiSend/kodi-send.py /tmp/kodi_
   mkdir -p /tmp/kodi_build/usr/lib/python2.7/ && cp /tmp/kodi_src/tools/EventClients/lib/python/xbmcclient.py /tmp/kodi_build/usr/lib/python2.7/xbmcclient.py
 
 
-FROM debian:stretch
+FROM debian:buster
 
 MAINTAINER milaq
 LABEL build_version="Build-date:- ${BUILD_DATE}"
@@ -110,45 +119,50 @@ COPY --from=buildstage /tmp/kodi_build/usr/ /usr/
 ARG DEBIAN_FRONTEND="noninteractive"
 COPY dpkg_excludes /etc/dpkg/dpkg.cfg.d/excludes
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
-  libcurl3 \
+RUN echo "deb http://deb.debian.org/debian buster-backports main non-free" > /etc/apt/sources.list.d/backports.list && \
+    echo "Package: *\nPin: release a=buster-backports\nPin-Priority: 500\n"  > /etc/apt/preferences.d/99debian-backports && \
+    apt-get update && apt-get install --no-install-recommends -y \
+  libcurl4 \
   libegl1-mesa \
   libglu1-mesa \
   libfreetype6 \
   libfribidi0 \
-  libglew2.0 \
+  libglew2.1 \
   liblzo2-2 \
   libmicrohttpd12 \
-  libmariadbclient18 \
-  libnfs8 \
+  libmariadb3 \
+  libnfs12 \
   libpcrecpp0v5 \
-  libpython2.7 \
+  libpython3.7 \
   libsmbclient \
   libtag1v5 \
   libtinyxml2.6.2v5 \
   libxml2 \
-  libcdio13 \
+  libcdio18 \
   libxcb-shape0 \
   libxrandr2 \
   libxslt1.1 \
   libyajl2 \
-  libass5 \
-  libiso9660-8 \
+  libass9 \
+  libiso9660-11 \
   libfstrcmp0 \
+  libspdlog1 \
+  libatomic1 \
+  libunistring2 \
   ca-certificates \
   xmlstarlet \
   && \
   apt-get clean
 
-RUN mkdir /var/cache/samba
-RUN mkdir -p /config/userdata
-COPY advancedsettings.xml.default /usr/local/share/kodi/advancedsettings.xml.default
-COPY smb.conf /config/.smb/user.conf
-COPY kodi_init /sbin/kodi_init
-
-RUN useradd -m -u 10000 kodi && \
+RUN mkdir /var/cache/samba && \
+    mkdir /usr/lib/kodi/addons && \
+    mkdir -p /config/userdata && \
+    useradd -m -u 10000 kodi && \
     chown kodi. -R /config && \
     ln -s /config /usr/share/kodi/portable_data
+
+COPY advancedsettings.xml.default guisettings.xml.default smb.conf /usr/local/share/kodi/
+COPY kodi_init /sbin/kodi_init
 
 VOLUME /config
 WORKDIR /config

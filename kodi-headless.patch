@@ -52,11 +52,9 @@ Subject: [PATCH] create a dedicated Headless WinSystem which does nothing and
  mode change 100644 => 100755 xbmc/windowing/win10/WinSystemWin10DX.cpp
  mode change 100644 => 100755 xbmc/windowing/windows/WinSystemWin32DX.cpp
 
-diff --git a/xbmc/AppParamParser.cpp b/xbmc/AppParamParser.cpp
-index 63920101d0a8..d1daa4618734 100644
 --- a/xbmc/AppParamParser.cpp
 +++ b/xbmc/AppParamParser.cpp
-@@ -54,6 +54,7 @@ void CAppParamParser::DisplayHelp()
+@@ -55,6 +55,7 @@
    printf("Arguments:\n");
    printf("  -fs\t\t\tRuns %s in full screen\n", CSysInfo::GetAppName().c_str());
    printf("  --standalone\t\t%s runs in a stand alone environment without a window \n", CSysInfo::GetAppName().c_str());
@@ -64,7 +62,7 @@ index 63920101d0a8..d1daa4618734 100644
    printf("\t\t\tmanager and supporting applications. For example, that\n");
    printf("\t\t\tenables network settings.\n");
    printf("  -p or --portable\t%s will look for configurations in install folder instead of ~/.%s\n", CSysInfo::GetAppName().c_str(), lcAppName.c_str());
-@@ -75,6 +76,8 @@ void CAppParamParser::ParseArg(const std::string &arg)
+@@ -76,6 +77,8 @@
      DisplayVersion();
    else if (arg == "--standalone")
      m_standAlone = true;
@@ -73,11 +71,9 @@ index 63920101d0a8..d1daa4618734 100644
    else if (arg == "-p" || arg  == "--portable")
      m_platformDirectories = false;
    else if (arg == "--debug")
-diff --git a/xbmc/AppParamParser.h b/xbmc/AppParamParser.h
-index a0823364e5ca..dbb3509fd88d 100644
 --- a/xbmc/AppParamParser.h
 +++ b/xbmc/AppParamParser.h
-@@ -30,6 +30,7 @@ class CAppParamParser
+@@ -30,6 +30,7 @@
    bool m_platformDirectories = true;
    bool m_testmode = false;
    bool m_standAlone = false;
@@ -85,21 +81,17 @@ index a0823364e5ca..dbb3509fd88d 100644
  
  private:
    void ParseArg(const std::string &arg);
-diff --git a/xbmc/Application.cpp b/xbmc/Application.cpp
-old mode 100644
-new mode 100755
-index 1a6b8fa3aa3b..5b464d562d72
 --- a/xbmc/Application.cpp
 +++ b/xbmc/Application.cpp
-@@ -367,6 +367,7 @@ bool CApplication::Create(const CAppParamParser &params)
+@@ -364,6 +364,7 @@
    m_bPlatformDirectories = params.m_platformDirectories;
    m_bTestMode = params.m_testmode;
    m_bStandalone = params.m_standAlone;
 +  m_bHeadless = params.m_headLess;
  
-   m_pSettingsComponent.reset(new CSettingsComponent());
-   m_pSettingsComponent->Init(params);
-@@ -561,7 +562,7 @@ bool CApplication::Create(const CAppParamParser &params)
+   CServiceBroker::CreateLogging();
+ 
+@@ -577,7 +578,7 @@
    m_pAppPort = std::make_shared<CAppInboundProtocol>(*this);
    CServiceBroker::RegisterAppPort(m_pAppPort);
  
@@ -108,7 +100,7 @@ index 1a6b8fa3aa3b..5b464d562d72
    CServiceBroker::RegisterWinSystem(m_pWinSystem.get());
  
    if (!m_ServiceManager->InitStageTwo(params, m_pSettingsComponent->GetProfileManager()->GetProfileUserDataFolder()))
-@@ -608,7 +609,7 @@ bool CApplication::CreateGUI()
+@@ -622,7 +623,7 @@
  {
    m_frameMoveGuard.lock();
  
@@ -117,18 +109,18 @@ index 1a6b8fa3aa3b..5b464d562d72
  
    if (!CServiceBroker::GetWinSystem()->InitWindowSystem())
    {
-@@ -762,7 +763,7 @@ bool CApplication::Initialize()
-   // Init DPMS, before creating the corresponding setting control.
-   m_dpms.reset(new DPMSSupport());
+@@ -776,7 +777,7 @@
+ 
    bool uiInitializationFinished = false;
+ 
 -  if (CServiceBroker::GetGUI()->GetWindowManager().Initialized())
 +  if (!m_bHeadless && CServiceBroker::GetGUI()->GetWindowManager().Initialized())
    {
      const std::shared_ptr<CSettings> settings = CServiceBroker::GetSettingsComponent()->GetSettings();
-     settings->GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
-@@ -873,9 +874,12 @@ bool CApplication::Initialize()
  
-   CLog::Log(LOGNOTICE, "initialize done");
+@@ -904,9 +905,12 @@
+ 
+   CLog::Log(LOGINFO, "initialize done");
  
 -  CheckOSScreenSaverInhibitionSetting();
 -  // reset our screensaver (starts timers etc.)
@@ -142,11 +134,9 @@ index 1a6b8fa3aa3b..5b464d562d72
  
    // if the user interfaces has been fully initialized let everyone know
    if (uiInitializationFinished)
-diff --git a/xbmc/Application.h b/xbmc/Application.h
-index 30cf6e7d3246..4cebb7703e04 100644
 --- a/xbmc/Application.h
 +++ b/xbmc/Application.h
-@@ -309,6 +309,7 @@ friend class CAppInboundProtocol;
+@@ -312,6 +312,7 @@
  
    bool PlatformDirectoriesEnabled() { return m_bPlatformDirectories; }
    bool IsStandAlone() { return m_bStandalone; }
@@ -154,7 +144,7 @@ index 30cf6e7d3246..4cebb7703e04 100644
    bool IsEnableTestMode() { return m_bTestMode; }
  
    bool IsAppFocused() const { return m_AppFocused; }
-@@ -439,6 +440,7 @@ friend class CAppInboundProtocol;
+@@ -444,6 +445,7 @@
    bool m_skipGuiRender = false;
  
    bool m_bStandalone = false;
@@ -162,13 +152,6 @@ index 30cf6e7d3246..4cebb7703e04 100644
    bool m_bTestMode = false;
    bool m_bSystemScreenSaverEnable = false;
  
-diff --git a/xbmc/platform/xbmc.cpp b/xbmc/platform/xbmc.cpp
-old mode 100644
-new mode 100755
-diff --git a/xbmc/windowing/CMakeLists.txt b/xbmc/windowing/CMakeLists.txt
-old mode 100644
-new mode 100755
-index 1904e2c0ff38..16267bb759b7
 --- a/xbmc/windowing/CMakeLists.txt
 +++ b/xbmc/windowing/CMakeLists.txt
 @@ -1,13 +1,15 @@
@@ -188,13 +171,9 @@ index 1904e2c0ff38..16267bb759b7
              XBMC_events.h
              VideoSync.h)
  
-diff --git a/xbmc/windowing/WinSystem.h b/xbmc/windowing/WinSystem.h
-old mode 100644
-new mode 100755
-index 6e84c49e5fd5..aabd4529d7eb
 --- a/xbmc/windowing/WinSystem.h
 +++ b/xbmc/windowing/WinSystem.h
-@@ -40,7 +40,7 @@ class CWinSystemBase
+@@ -45,7 +45,7 @@
    CWinSystemBase();
    virtual ~CWinSystemBase();
  
@@ -203,9 +182,6 @@ index 6e84c49e5fd5..aabd4529d7eb
  
    // Access render system interface
    virtual CRenderSystemBase *GetRenderSystem() { return nullptr; }
-diff --git a/xbmc/windowing/WinSystemHeadless.cpp b/xbmc/windowing/WinSystemHeadless.cpp
-new file mode 100755
-index 000000000000..3f057f78fc13
 --- /dev/null
 +++ b/xbmc/windowing/WinSystemHeadless.cpp
 @@ -0,0 +1,57 @@
@@ -266,9 +242,6 @@ index 000000000000..3f057f78fc13
 +{
 +  CLog::Log(LOGDEBUG, message.c_str());
 +};
-diff --git a/xbmc/windowing/WinSystemHeadless.h b/xbmc/windowing/WinSystemHeadless.h
-new file mode 100755
-index 000000000000..839fb0982679
 --- /dev/null
 +++ b/xbmc/windowing/WinSystemHeadless.h
 @@ -0,0 +1,78 @@
@@ -350,31 +323,24 @@ index 000000000000..839fb0982679
 +private:
 +
 +};
-diff --git a/xbmc/windowing/X11/CMakeLists.txt b/xbmc/windowing/X11/CMakeLists.txt
-old mode 100644
-new mode 100755
-index 282e96fa3457..c23ad4be8cb6
 --- a/xbmc/windowing/X11/CMakeLists.txt
 +++ b/xbmc/windowing/X11/CMakeLists.txt
-@@ -4,6 +4,7 @@ set(SOURCES GLContextEGL.cpp
+@@ -4,6 +4,7 @@
              OSScreenSaverX11.cpp
              WinEventsX11.cpp
              WinSystemX11.cpp
 +            WinSystemHeadlessX11.cpp
-             WinSystemX11GLContext.cpp
              XRandR.cpp
-             VideoSyncOML.cpp)
-@@ -14,6 +15,7 @@ set(HEADERS GLContext.h
+             X11DPMSSupport.cpp)
+ 
+@@ -13,6 +14,7 @@
              OSScreenSaverX11.h
              WinEventsX11.h
              WinSystemX11.h
 +            WinSystemHeadlessX11.h
-             WinSystemX11GLContext.h
              XRandR.h
-             VideoSyncOML.h)
-diff --git a/xbmc/windowing/X11/WinSystemHeadlessX11.cpp b/xbmc/windowing/X11/WinSystemHeadlessX11.cpp
-new file mode 100755
-index 000000000000..3eb5681051a4
+             X11DPMSSupport.h)
+ 
 --- /dev/null
 +++ b/xbmc/windowing/X11/WinSystemHeadlessX11.cpp
 @@ -0,0 +1,50 @@
@@ -428,9 +394,6 @@ index 000000000000..3eb5681051a4
 +{
 +  CLog::Log(LOGDEBUG, message.c_str());
 +};
-diff --git a/xbmc/windowing/X11/WinSystemHeadlessX11.h b/xbmc/windowing/X11/WinSystemHeadlessX11.h
-new file mode 100755
-index 000000000000..c77aa9a1c143
 --- /dev/null
 +++ b/xbmc/windowing/X11/WinSystemHeadlessX11.h
 @@ -0,0 +1,81 @@
@@ -515,21 +478,17 @@ index 000000000000..c77aa9a1c143
 +private:
 +
 +};
-diff --git a/xbmc/windowing/X11/WinSystemX11GLContext.cpp b/xbmc/windowing/X11/WinSystemX11GLContext.cpp
-old mode 100644
-new mode 100755
-index 5b0b155736b9..b454ffd9cc60
 --- a/xbmc/windowing/X11/WinSystemX11GLContext.cpp
 +++ b/xbmc/windowing/X11/WinSystemX11GLContext.cpp
-@@ -9,6 +9,7 @@
- #include <X11/Xlib.h>
- #include <X11/Xutil.h>
+@@ -6,6 +6,7 @@
+  *  See LICENSES/README.md for more information.
+  */
  
 +#include "WinSystemHeadlessX11.h"
  #include "WinSystemX11GLContext.h"
- #include "GLContextEGL.h"
- #include "utils/log.h"
-@@ -32,9 +33,13 @@
+ 
+ #include "Application.h"
+@@ -36,9 +37,13 @@
  
  using namespace KODI;
  
@@ -545,51 +504,19 @@ index 5b0b155736b9..b454ffd9cc60
    return winSystem;
  }
  
-diff --git a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
-old mode 100644
-new mode 100755
-index 076f7718f0d1..43ff6da6a935
---- a/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
-+++ b/xbmc/windowing/amlogic/WinSystemAmlogicGLESContext.cpp
-@@ -7,13 +7,21 @@
-  */
- 
- #include "VideoSyncAML.h"
-+#include "windowing/WinSystemHeadless.h"
- #include "WinSystemAmlogicGLESContext.h"
- #include "utils/log.h"
- #include "threads/SingleLock.h"
- 
--std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem()
-+std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem(bool render)
- {
--  std::unique_ptr<CWinSystemBase> winSystem(new CWinSystemAmlogicGLESContext());
-+  std::unique_ptr<CWinSystemBase> winSystem(nullptr);
-+  if (render)
-+    winSystem.reset(new CWinSystemAmlogicGLESContext());
-+  else
-+  {
-+    winSystem.reset(new CWinSystemHeadless());
-+    CLog::Log(LOGWARNING, "HEADLESS MOD NOT TESTED ON THIS BUILD");
-+  }
-   return winSystem;
- }
- 
-diff --git a/xbmc/windowing/android/WinSystemAndroidGLESContext.cpp b/xbmc/windowing/android/WinSystemAndroidGLESContext.cpp
-old mode 100644
-new mode 100755
-index db326d62ae60..b163038673eb
 --- a/xbmc/windowing/android/WinSystemAndroidGLESContext.cpp
 +++ b/xbmc/windowing/android/WinSystemAndroidGLESContext.cpp
-@@ -7,14 +7,22 @@
+@@ -6,6 +6,7 @@
+  *  See LICENSES/README.md for more information.
   */
  
- #include "VideoSyncAndroid.h"
 +#include "windowing/WinSystemHeadless.h"
  #include "WinSystemAndroidGLESContext.h"
- #include "utils/log.h"
- #include "threads/SingleLock.h"
- #include "platform/android/activity/XBMCApp.h"
+ 
+ #include "ServiceBroker.h"
+@@ -21,9 +22,16 @@
+ #include <EGL/eglext.h>
+ 
  
 -std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem()
 +std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem(bool render)
@@ -606,21 +533,17 @@ index db326d62ae60..b163038673eb
    return winSystem;
  }
  
-diff --git a/xbmc/windowing/gbm/WinSystemGbmGLContext.cpp b/xbmc/windowing/gbm/WinSystemGbmGLContext.cpp
-old mode 100644
-new mode 100755
-index 7dc31f3fb361..1eb92acbb986
 --- a/xbmc/windowing/gbm/WinSystemGbmGLContext.cpp
 +++ b/xbmc/windowing/gbm/WinSystemGbmGLContext.cpp
-@@ -14,6 +14,7 @@
- #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
- #include "EGL/egl.h"
- #include "EGL/eglext.h"
+@@ -6,6 +6,7 @@
+  *  See LICENSES/README.md for more information.
+  */
+ 
 +#include "windowing/WinSystemHeadless.h"
  #include "WinSystemGbmGLContext.h"
+ 
  #include "OptionalsReg.h"
- #include "platform/linux/XTimeUtils.h"
-@@ -25,9 +26,13 @@ CWinSystemGbmGLContext::CWinSystemGbmGLContext()
+@@ -33,9 +34,13 @@
  : CWinSystemGbmEGLContext(EGL_PLATFORM_GBM_MESA, "EGL_MESA_platform_gbm")
  {}
  
@@ -636,21 +559,17 @@ index 7dc31f3fb361..1eb92acbb986
    return winSystem;
  }
  
-diff --git a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
-old mode 100644
-new mode 100755
-index c24cb919aec9..dce9fb7ac3df
 --- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
 +++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
-@@ -20,6 +20,7 @@
- #include "OptionalsReg.h"
- #include "platform/linux/XTimeUtils.h"
- #include "utils/log.h"
+@@ -6,6 +6,7 @@
+  *  See LICENSES/README.md for more information.
+  */
+ 
 +#include "windowing/WinSystemHeadless.h"
  #include "WinSystemGbmGLESContext.h"
  
- #include <gbm.h>
-@@ -32,9 +33,13 @@ CWinSystemGbmGLESContext::CWinSystemGbmGLESContext()
+ #include "OptionalsReg.h"
+@@ -38,9 +39,13 @@
  : CWinSystemGbmEGLContext(EGL_PLATFORM_GBM_MESA, "EGL_MESA_platform_gbm")
  {}
  
@@ -666,54 +585,19 @@ index c24cb919aec9..dce9fb7ac3df
    return winSystem;
  }
  
-diff --git a/xbmc/windowing/osx/WinSystemIOS.mm b/xbmc/windowing/osx/WinSystemIOS.mm
-old mode 100644
-new mode 100755
-index 7f849ba31282..a889e4fe66e3
---- a/xbmc/windowing/osx/WinSystemIOS.mm
-+++ b/xbmc/windowing/osx/WinSystemIOS.mm
-@@ -7,6 +7,7 @@
-  */
- 
- #include "VideoSyncIos.h"
-+#include "windowing/WinSystemHeadless.h"
- #include "WinEventsIOS.h"
- #include "WinSystemIOS.h"
- #include "cores/AudioEngine/Sinks/AESinkDARWINIOS.h"
-@@ -63,9 +64,16 @@ - (void) runDisplayLink;
-   IOSDisplayLinkCallback *callbackClass;
- };
- 
--std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem()
-+std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem(bool render)
- {
--  std::unique_ptr<CWinSystemBase> winSystem(new CWinSystemIOS());
-+  std::unique_ptr<CWinSystemBase> winSystem(nullptr);
-+  if (render)
-+    winSystem.reset(new CWinSystemIOS());
-+  else
-+  {
-+    winSystem.reset(new CWinSystemHeadless());
-+    CLog::Log(LOGWARNING, "HEADLESS MOD NOT TESTED ON THIS BUILD");
-+  }
-   return winSystem;
- }
- 
-diff --git a/xbmc/windowing/osx/WinSystemOSXGL.mm b/xbmc/windowing/osx/WinSystemOSXGL.mm
-old mode 100644
-new mode 100755
-index 9ec4ffe49e30..8f4056bd1fba
 --- a/xbmc/windowing/osx/WinSystemOSXGL.mm
 +++ b/xbmc/windowing/osx/WinSystemOSXGL.mm
-@@ -7,15 +7,24 @@
+@@ -6,17 +6,25 @@
+  *  See LICENSES/README.md for more information.
   */
  
- #include "guilib/Texture.h"
 +#include "windowing/WinSystemHeadless.h"
  #include "WinSystemOSXGL.h"
- #include "rendering/gl/RenderSystemGL.h"
-+#include "utils/log.h"
  
+ #include "guilib/Texture.h"
+ #include "rendering/gl/RenderSystemGL.h"
+-
++#include "utils/log.h"
  
  //------------------------------------------------------------------------------
  //------------------------------------------------------------------------------
@@ -732,43 +616,6 @@ index 9ec4ffe49e30..8f4056bd1fba
    return winSystem;
  }
  
-diff --git a/xbmc/windowing/rpi/WinSystemRpiGLESContext.cpp b/xbmc/windowing/rpi/WinSystemRpiGLESContext.cpp
-old mode 100644
-new mode 100755
-index a949c85e8b35..8689c178f703
---- a/xbmc/windowing/rpi/WinSystemRpiGLESContext.cpp
-+++ b/xbmc/windowing/rpi/WinSystemRpiGLESContext.cpp
-@@ -8,6 +8,7 @@
- 
- #include "Application.h"
- #include "VideoSyncPi.h"
-+#include "windowing/WinSystemHeadless.h"
- #include "WinSystemRpiGLESContext.h"
- #include "guilib/GUIComponent.h"
- #include "guilib/GUIWindowManager.h"
-@@ -24,9 +25,16 @@
- using namespace KODI;
- 
- 
--std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem()
-+std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem(bool render)
- {
--  std::unique_ptr<CWinSystemBase> winSystem(new CWinSystemRpiGLESContext());
-+  std::unique_ptr<CWinSystemBase> winSystem(nullptr);
-+  if (render)
-+    winSystem.reset(new CWinSystemRpiGLESContext());
-+  else
-+  {
-+    winSystem.reset(new CWinSystemHeadless());
-+    CLog::Log(LOGWARNING, "HEADLESS MOD NOT TESTED ON THIS BUILD");
-+  }
-   return winSystem;
- }
- 
-diff --git a/xbmc/windowing/wayland/WinSystemWaylandEGLContextGL.cpp b/xbmc/windowing/wayland/WinSystemWaylandEGLContextGL.cpp
-old mode 100644
-new mode 100755
-index 9d5f0e3d9e56..dbbe558d57c8
 --- a/xbmc/windowing/wayland/WinSystemWaylandEGLContextGL.cpp
 +++ b/xbmc/windowing/wayland/WinSystemWaylandEGLContextGL.cpp
 @@ -6,6 +6,7 @@
@@ -777,9 +624,9 @@ index 9d5f0e3d9e56..dbbe558d57c8
  
 +#include "windowing/WinSystemHeadless.h"
  #include "WinSystemWaylandEGLContextGL.h"
- #include "OptionalsReg.h"
  
-@@ -19,9 +20,16 @@
+ #include "OptionalsReg.h"
+@@ -24,9 +25,16 @@
  
  using namespace KODI::WINDOWING::WAYLAND;
  
@@ -798,10 +645,6 @@ index 9d5f0e3d9e56..dbbe558d57c8
    return winSystem;
  }
  
-diff --git a/xbmc/windowing/wayland/WinSystemWaylandEGLContextGLES.cpp b/xbmc/windowing/wayland/WinSystemWaylandEGLContextGLES.cpp
-old mode 100644
-new mode 100755
-index dc7de3e8ab65..4dfb15b8f746
 --- a/xbmc/windowing/wayland/WinSystemWaylandEGLContextGLES.cpp
 +++ b/xbmc/windowing/wayland/WinSystemWaylandEGLContextGLES.cpp
 @@ -6,6 +6,7 @@
@@ -810,9 +653,9 @@ index dc7de3e8ab65..4dfb15b8f746
  
 +#include "windowing/WinSystemHeadless.h"
  #include "WinSystemWaylandEGLContextGLES.h"
- #include "OptionalsReg.h"
  
-@@ -19,9 +20,16 @@
+ #include "OptionalsReg.h"
+@@ -26,9 +27,16 @@
  
  using namespace KODI::WINDOWING::WAYLAND;
  
@@ -831,18 +674,19 @@ index dc7de3e8ab65..4dfb15b8f746
    return winSystem;
  }
  
-diff --git a/xbmc/windowing/win10/WinSystemWin10DX.cpp b/xbmc/windowing/win10/WinSystemWin10DX.cpp
-old mode 100644
-new mode 100755
-index 2ac39b1d818f..c8fdf151535f
 --- a/xbmc/windowing/win10/WinSystemWin10DX.cpp
 +++ b/xbmc/windowing/win10/WinSystemWin10DX.cpp
-@@ -10,11 +10,20 @@
- #include "input/touch/generic/GenericTouchInputHandler.h"
- #include "rendering/dx/DirectXHelper.h"
- #include "utils/log.h"
+@@ -6,6 +6,7 @@
+  *  See LICENSES/README.md for more information.
+  */
+ 
 +#include "windowing/WinSystemHeadless.h"
  #include "WinSystemWin10DX.h"
+ 
+ #include "input/touch/generic/GenericTouchActionHandler.h"
+@@ -16,9 +17,17 @@
+ 
+ #include "platform/win32/WIN32Util.h"
  
 -std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem()
 +std::unique_ptr<CWinSystemBase> CWinSystemBase::CreateWinSystem(bool render)
@@ -860,10 +704,6 @@ index 2ac39b1d818f..c8fdf151535f
  }
  
  CWinSystemWin10DX::CWinSystemWin10DX() : CRenderSystemDX()
-diff --git a/xbmc/windowing/windows/WinSystemWin32DX.cpp b/xbmc/windowing/windows/WinSystemWin32DX.cpp
-old mode 100644
-new mode 100755
-index 2270a65000f0..17fdb5ebca97
 --- a/xbmc/windowing/windows/WinSystemWin32DX.cpp
 +++ b/xbmc/windowing/windows/WinSystemWin32DX.cpp
 @@ -6,6 +6,7 @@
@@ -872,9 +712,9 @@ index 2270a65000f0..17fdb5ebca97
  
 +#include "windowing/WinSystemHeadless.h"
  #include "WinSystemWin32DX.h"
+ 
  #include "commons/ilog.h"
- #include "platform/win32/CharsetConverter.h"
-@@ -40,9 +41,16 @@ static PFND3D10DDI_OPENADAPTER s_fnOpenAdapter10_2{ nullptr };
+@@ -50,9 +51,16 @@
  static PFND3D10DDI_CREATEDEVICE s_fnCreateDeviceOrig{ nullptr };
  static PFND3D10DDI_CREATERESOURCE s_fnCreateResourceOrig{ nullptr };
  
