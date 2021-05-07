@@ -129,5 +129,5 @@ echo "Starting Kodi..."
 if [ -f /config/temp/kodi.log ]; then
   rm /config/temp/kodi.log
 fi
-tail -F -q /config/temp/kodi.log 2>/dev/null &
+tail -F -q /config/temp/kodi.log 2>/dev/null | grep -v -e "CActiveAE::StateMachine - signal: 22 from port: timer not handled for state" -e "Previous line repeats" &
 exec su kodi -c "kodi -p --standalone --headless"
