@@ -19,12 +19,18 @@ if [ ! -e /config/userdata/advancedsettings.xml ]; then
     xmlstarlet ed -L -u "advancedsettings/videodatabase/host" -v "$KODI_DBHOST" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/videodatabase/user" -v "$KODI_DBUSER" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/videodatabase/pass" -v "$KODI_DBPASS" /config/userdata/advancedsettings.xml
+    if [ ! -z $KODI_DBPORT ]; then
+      xmlstarlet ed -L -u "advancedsettings/videodatabase/port" -v "$KODI_DBPORT" /config/userdata/advancedsettings.xml
+    fi
     if [ ! -z $KODI_DBPREFIX_VIDEOS ]; then
       xmlstarlet ed -L -u "advancedsettings/videodatabase/name" -v "$KODI_DBPREFIX_VIDEOS" /config/userdata/advancedsettings.xml
     fi
     xmlstarlet ed -L -u "advancedsettings/musicdatabase/host" -v "$KODI_DBHOST" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/musicdatabase/user" -v "$KODI_DBUSER" /config/userdata/advancedsettings.xml
     xmlstarlet ed -L -u "advancedsettings/musicdatabase/pass" -v "$KODI_DBPASS" /config/userdata/advancedsettings.xml
+    if [ ! -z $KODI_DBPORT ]; then
+      xmlstarlet ed -L -u "advancedsettings/musicdatabase/port" -v "$KODI_DBPORT" /config/userdata/advancedsettings.xml
+    fi
     if [ ! -z $KODI_DBPREFIX_MUSIC ]; then
       xmlstarlet ed -L -u "advancedsettings/musicdatabase/name" -v "$KODI_DBPREFIX_MUSIC" /config/userdata/advancedsettings.xml
     fi

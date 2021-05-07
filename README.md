@@ -53,6 +53,7 @@ Container environment variables:
 * `KODI_DBHOST` - MySQL database host address
 * `KODI_DBUSER` - MySQL user for Kodi
 * `KODI_DBPASS` - MySQL password for Kodi user
+* `KODI_DBPORT` - MySQL remote port (default: `3306`)
 * `KODI_DBPREFIX_VIDEOS` - MySQL database prefix for the video database
 * `KODI_DBPREFIX_MUSIC` - MySQL database prefix for the music database
 * `KODI_UPDATE_INTERVAL_ADDONS` - How often to update addons in seconds (default: 21600 [6 hours])
