@@ -35,7 +35,7 @@ docker pull milaq/kodi-headless:leia
 
 Run the container and set necessary environment variables:
 ```bash
-docker run -d --restart=always --name kodi-headless -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless:leia
+docker run -d --restart=always --log-opt max-size=50M --name kodi-headless -e KODI_DBHOST=<MY_KODI_DBHOST> -e KODI_DBUSER=<MY_KODI_DBUSER> -e KODI_DBPASS=<MY_KODI_DBPASS> milaq/kodi-headless:leia
 ```
 
 If you want to map the webinterface ports natively then also append:
@@ -55,9 +55,17 @@ Container environment variables:
 * `KODI_DBPASS` - MySQL password for Kodi user
 * `KODI_DBPREFIX_VIDEOS` - MySQL database prefix for the video database
 * `KODI_DBPREFIX_MUSIC` - MySQL database prefix for the music database
-* `KODI_UPDATE_INTERVAL` - How often to scan for library changes on remote sources in seconds (optional, default is 300 [5 minutes])
-* `KODI_CLEAN` - Whether to clean up the library periodically [`true`/`false`] (optional, requires sources.xml to be present)
-* `KODI_CLEAN_INTERVAL` - How often to clean up the library in seconds (optional, default is 86400 [1 day])
+* `KODI_UPDATE_INTERVAL_ADDONS` - How often to update addons in seconds (default: 21600 [6 hours])
+* `KODI_UPDATE_INTERVAL` - How often to scan for video/music library changes on remote sources in seconds (`0` to disable, default: 300 [5 minutes])
+* `KODI_UPDATE_INTERVAL_VIDEOS` - How often to scan for video library changes on remote sources in seconds (`0` to disable, default: `KODI_UPDATE_INTERVAL`)
+* `KODI_UPDATE_INTERVAL_MUSIC` - How often to scan for music library changes on remote sources in seconds (`0` to disable, default: `KODI_UPDATE_INTERVAL`)
+* `KODI_CLEAN_INTERVAL` - How often to clean up the video/music library in seconds (requires sources.xml to be present, `0` to disable, default: disabled)
+* `KODI_CLEAN_INTERVAL_VIDEOS` - How often to clean up the video library in seconds (`0` to disable, default: `KODI_CLEAN_INTERVAL`)
+* `KODI_CLEAN_INTERVAL_MUSIC` - How often to clean up the music library in seconds (`0` to disable, default: `KODI_CLEAN_INTERVAL`)
+
+Deprecated:
+
+* `KODI_CLEAN` - Whether to clean up the library periodically [`true`/`false`] (deprecated, use `KODI_CLEAN_INTERVAL`)
 
 _Experimental_: You may also mount your own copy of `advancedsettings.xml` if you like to. The container startup will then skip any of the database configuration variables (KODI_DB*) and just use the supplied copy.
 
@@ -73,9 +81,9 @@ inside the container volume directly or reference a copy on the docker host, e.g
 -v /path/to/sources.xml:/config/userdata/sources.xml
 -v /path/to/passwords.xml:/config/userdata/passwords.xml
 ```
-and enable library cleaning via the respective flag:
+and enable library cleaning via the respective flag, e.g.:
 ```bash
--e KODI_CLEAN=yes
+-e KODI_CLEAN_INTERVAL=86400
 ```
 
 __WARNING__: A misconfigured sources.xml or passwords.xml can lead to the Kodi instance not finding any of your media which will result in emtpying your database. Make a backup of your database and/or be double sure before enabling this feature!

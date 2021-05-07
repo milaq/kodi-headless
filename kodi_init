@@ -30,42 +30,89 @@ else
 fi
 
 if [ -z $KODI_UPDATE_INTERVAL ]; then
-  KODI_UPDATE_INTERVAL="300"
+  KODI_UPDATE_INTERVAL=300
+fi
+if [ -z $KODI_UPDATE_INTERVAL_VIDEOS ]; then
+  KODI_UPDATE_INTERVAL_VIDEOS=$KODI_UPDATE_INTERVAL
+fi
+if [ -z $KODI_UPDATE_INTERVAL_MUSIC ]; then
+  KODI_UPDATE_INTERVAL_MUSIC=$KODI_UPDATE_INTERVAL
 fi
 if [ -z $KODI_CLEAN_INTERVAL ]; then
-  KODI_CLEAN_INTERVAL="86400"
+  # support legacy clean setting for now
+  if [[ $KODI_CLEAN == "yes" ]] || [[ $KODI_CLEAN == "true" ]]; then
+    KODI_CLEAN_INTERVAL=86400
+  else
+    KODI_CLEAN_INTERVAL=0
+  fi
+fi
+if [ -z $KODI_CLEAN_INTERVAL_VIDEOS ]; then
+  KODI_CLEAN_INTERVAL_VIDEOS=$KODI_CLEAN_INTERVAL
+fi
+if [ -z $KODI_CLEAN_INTERVAL_MUSIC ]; then
+  KODI_CLEAN_INTERVAL_MUSIC=$KODI_CLEAN_INTERVAL
+fi
+if [ -z $KODI_UPDATE_INTERVAL_ADDONS ]; then
+  KODI_UPDATE_INTERVAL_ADDONS=21600
 fi
 
 function update_library_job {
   while true; do
-    sleep $KODI_UPDATE_INTERVAL
-    sleep $((RANDOM % 5))
-    su kodi -c "kodi-send --action='UpdateLibrary(video)'" > /dev/null
-    su kodi -c "kodi-send --action='UpdateLibrary(music)'" > /dev/null
+    sleep $2
+    sleep $((RANDOM % 30))
+    echo "Triggering $1 library update"
+    su kodi -c "kodi-send --action='UpdateLibrary($1)'" > /dev/null
   done
 }
 
 function clean_library_job {
   while true; do
-    sleep $KODI_CLEAN_INTERVAL
-    su kodi -c "kodi-send --action='CleanLibrary(video)'" > /dev/null
-    su kodi -c "kodi-send --action='CleanLibrary(music)'" > /dev/null
+    sleep $2
+    sleep $((RANDOM % 30))
+    echo "Triggering $1 library cleanup"
+    su kodi -c "kodi-send --action='CleanLibrary($1)'" > /dev/null
   done
 }
 
-update_library_job &
-echo "Automatic library update: YES (${KODI_UPDATE_INTERVAL}s)"
+function update_addons_job {
+  while true; do
+    sleep $1
+    sleep $((RANDOM % 30))
+    echo "Triggering addon updates"
+    su kodi -c "kodi-send --action='UpdateAddonRepos'" > /dev/null
+  done
+}
 
-if [[ $KODI_CLEAN == "yes" ]] || [[ $KODI_CLEAN == "true" ]]; then
-  if [ -e /config/userdata/sources.xml ] && [ -e /config/userdata/passwords.xml ]; then
-    echo "Automatic library cleaning: YES (${KODI_CLEAN_INTERVAL}s)"
-    clean_library_job &
+if [[ $KODI_UPDATE_INTERVAL_VIDEOS -gt 0 ]]; then
+  echo "Automatic video library update: YES (${KODI_UPDATE_INTERVAL_VIDEOS}s)"
+  update_library_job video $KODI_UPDATE_INTERVAL_VIDEOS &
+else
+  echo "Automatic video library update: NO"
+fi
+if [[ $KODI_UPDATE_INTERVAL_MUSIC -gt 0 ]]; then
+  echo "Automatic music library update: YES (${KODI_UPDATE_INTERVAL_MUSIC}s)"
+  update_library_job music $KODI_UPDATE_INTERVAL_MUSIC &
+else
+  echo "Automatic music library update: NO"
+fi
+
+if [ -e /config/userdata/sources.xml ] && [ -e /config/userdata/passwords.xml ]; then
+  if [[ $KODI_CLEAN_INTERVAL_VIDEOS -gt 0 ]]; then
+    echo "Automatic video library cleaning: YES (${KODI_CLEAN_INTERVAL_VIDEOS}s)"
+    clean_library_job video $KODI_CLEAN_INTERVAL_VIDEOS &
   else
-    echo "Automatic library cleaning: NO (sources.xml/passwords.xml not found)"
+    echo "Automatic video library cleaning: NO"
+  fi
+  if [[ $KODI_CLEAN_INTERVAL_MUSIC -gt 0 ]]; then
+    echo "Automatic video library cleaning: YES (${KODI_CLEAN_INTERVAL_MUSIC}s)"
+    clean_library_job music $KODI_CLEAN_INTERVAL_MUSIC &
+  else
+    echo "Automatic music library cleaning: NO"
   fi
 else
-  echo "Automatic library cleaning: NO"
+  echo "Automatic library cleaning: NO (sources.xml/passwords.xml not found)"
 fi
+update_addons_job $KODI_UPDATE_INTERVAL_ADDONS &
 
 echo "======================================================="
 
