@@ -3,6 +3,12 @@
 set -e
 trap 'kill $(jobs -p) 2>/dev/null' EXIT
 
+KODI_STARTUP_DELAY=30
+KODI_FUZZY_INTERVAL=30
+KODI_DEFAULT_UPDATE_INTERVAL=900
+KODI_DEFAULT_CLEAN_INTERVAL=0
+KODI_DEFAULT_UPDATE_INTERVAL_ADDONS=21600
+
 echo "======================================================="
 if [ ! -e /config/userdata/advancedsettings.xml ]; then
   cp /usr/local/share/kodi/advancedsettings.xml.default /config/userdata/advancedsettings.xml
@@ -30,7 +36,7 @@ else
 fi
 
 if [ -z $KODI_UPDATE_INTERVAL ]; then
-  KODI_UPDATE_INTERVAL=300
+  KODI_UPDATE_INTERVAL=$KODI_DEFAULT_UPDATE_INTERVAL
 fi
 if [ -z $KODI_UPDATE_INTERVAL_VIDEOS ]; then
   KODI_UPDATE_INTERVAL_VIDEOS=$KODI_UPDATE_INTERVAL
@@ -43,7 +49,7 @@ if [ -z $KODI_CLEAN_INTERVAL ]; then
   if [[ $KODI_CLEAN == "yes" ]] || [[ $KODI_CLEAN == "true" ]]; then
     KODI_CLEAN_INTERVAL=86400
   else
-    KODI_CLEAN_INTERVAL=0
+    KODI_CLEAN_INTERVAL=$KODI_DEFAULT_CLEAN_INTERVAL
   fi
 fi
 if [ -z $KODI_CLEAN_INTERVAL_VIDEOS ]; then
@@ -53,13 +59,13 @@ if [ -z $KODI_CLEAN_INTERVAL_MUSIC ]; then
   KODI_CLEAN_INTERVAL_MUSIC=$KODI_CLEAN_INTERVAL
 fi
 if [ -z $KODI_UPDATE_INTERVAL_ADDONS ]; then
-  KODI_UPDATE_INTERVAL_ADDONS=21600
+  KODI_UPDATE_INTERVAL_ADDONS=$KODI_DEFAULT_UPDATE_INTERVAL_ADDONS
 fi
 
 function update_library_job {
   while true; do
     sleep $2
-    sleep $((RANDOM % 30))
+    sleep $((RANDOM % $KODI_FUZZY_INTERVAL))
     echo "Triggering $1 library update"
     su kodi -c "kodi-send --action='UpdateLibrary($1)'" > /dev/null
   done
@@ -68,16 +74,19 @@ function update_library_job {
 function clean_library_job {
   while true; do
     sleep $2
-    sleep $((RANDOM % 30))
+    sleep $((RANDOM % $KODI_FUZZY_INTERVAL))
     echo "Triggering $1 library cleanup"
     su kodi -c "kodi-send --action='CleanLibrary($1)'" > /dev/null
   done
 }
 
 function update_addons_job {
+  sleep $KODI_STARTUP_DELAY
+  echo "Triggering initial addon updates"
+  su kodi -c "kodi-send --action='UpdateAddonRepos'" > /dev/null
   while true; do
     sleep $1
-    sleep $((RANDOM % 30))
+    sleep $((RANDOM % $KODI_FUZZY_INTERVAL))
     echo "Triggering addon updates"
     su kodi -c "kodi-send --action='UpdateAddonRepos'" > /dev/null
   done
